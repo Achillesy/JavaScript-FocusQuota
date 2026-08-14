@@ -3,6 +3,7 @@
   "name": "FocusQuota",
   "version": "0.0.1",
   "description": "帮助您控制每天的普通上网时间——只提醒，不阻止。",
+  "permissions": ["storage"],
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "FocusQuota",
@@ -13,7 +14,8 @@
     }
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "icons": {
     "16": "icons/icon16.png",
