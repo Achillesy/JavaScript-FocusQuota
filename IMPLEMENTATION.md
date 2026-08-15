@@ -188,8 +188,11 @@ FocusQuota/
 **任务：**
 
 1. `js/exempt.js` 实现：
-   - 域名匹配：提取当前页 hostname；白名单项匹配「hostname 等于白名单项」或「hostname 以 `.白名单项` 结尾」（使 `www.chatgpt.com` 匹配 `chatgpt.com`，而 `notchatgpt.com` 不匹配）。
-   - 标题关键词：title 包含任一关键词（建议不区分大小写，说明理由）。
+   - 域名匹配：提取当前页 hostname；白名单项支持两类：
+     - 常规域名：「hostname 等于白名单项」或「hostname 以 `.白名单项` 结尾」（使 `www.chatgpt.com` 匹配 `chatgpt.com`，而 `notchatgpt.com` 不匹配）。
+     - IPv4 CIDR 网段（含 `/`，如 `192.168.31.0/24`）：hostname 为 IPv4 时按掩码比较网段归属，用于本地调试环境豁免。
+   - 本地环回地址内置豁免：`localhost`、`127.0.0.1`、`::1`、`[::1]`、`0.0.0.0` 一律不计时（不可通过配置删除）。
+   - 标题关键词：title 包含任一关键词（不区分大小写）。
    - 特殊页面：`chrome://`、`chrome-extension://`、`about:`、`file:` 一律不计时。
 2. 接入计时引擎：每次状态切换时评估当前 tab 是否豁免，豁免则不计时。
 3. 标题变化监听：用 `chrome.tabs.onUpdated` 的 `changeInfo.title` 捕获 SPA 页面标题变化并触发重新判定；**不得注入网页脚本**（DESIGN.md 第 5 节）。

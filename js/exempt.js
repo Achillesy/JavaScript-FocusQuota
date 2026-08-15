@@ -7,6 +7,9 @@ import { getConfig } from './storage.js';
 const SPECIAL_SCHEME_RE =
   /^(chrome|chrome-extension|about|devtools|edge|view-source|file|blob|data|javascript):/i;
 
+// 本地环回/本机地址：调试本地服务一律不计入普通浏览时间（内置，不可通过配置删除）
+const BUILTIN_LOCAL_HOSTS = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'];
+
 // 提取 URL 的 hostname（统一小写）；解析失败返回空串
 function extractHostname(url) {
   try {
@@ -22,10 +25,40 @@ function isSpecialPage(url) {
   return SPECIAL_SCHEME_RE.test(url);
 }
 
-// 白名单匹配：hostname 等于白名单项，或以 ".白名单项" 结尾。
-// 例：www.chatgpt.com 匹配 chatgpt.com；notchatgpt.com 不匹配（不以 .chatgpt.com 结尾）
+// IPv4 字符串 → 32 位无符号整数；非法返回 null
+function ipv4ToInt(ip) {
+  const parts = ip.split('.');
+  if (parts.length !== 4) return null;
+  let val = 0;
+  for (const p of parts) {
+    if (!/^\d{1,3}$/.test(p)) return null;
+    const n = Number(p);
+    if (n < 0 || n > 255) return null;
+    val = (val << 8) | n;
+  }
+  return val >>> 0;
+}
+
+// IPv4 CIDR 匹配（如 192.168.31.0/24）：hostname 在该网段内返回 true
+function matchesCidr(hostname, cidr) {
+  const slash = cidr.indexOf('/');
+  if (slash === -1) return false;
+  const prefix = Number(cidr.slice(slash + 1));
+  if (!Number.isInteger(prefix) || prefix < 0 || prefix > 32) return false;
+  const net = ipv4ToInt(cidr.slice(0, slash));
+  const host = ipv4ToInt(hostname);
+  if (net === null || host === null) return false; // 非 IPv4（如域名）不参与 CIDR 匹配
+  const mask = prefix === 0 ? 0 : (~0 << (32 - prefix)) >>> 0;
+  return (net & mask) === (host & mask);
+}
+
+// 白名单匹配：
+// - CIDR 网段（含 /，如 192.168.31.0/24）→ 网段匹配
+// - 常规域名 → hostname 等于白名单项，或以 ".白名单项" 结尾
+//   例：www.chatgpt.com 匹配 chatgpt.com；notchatgpt.com 不匹配（不以 .chatgpt.com 结尾）
 function matchesDomain(hostname, domain) {
   const d = domain.toLowerCase();
+  if (d.includes('/')) return matchesCidr(hostname, d);
   return hostname === d || hostname.endsWith('.' + d);
 }
 
@@ -42,6 +75,7 @@ export async function isExempt(url, title) {
   if (isSpecialPage(url)) return true;
   const hostname = extractHostname(url);
   if (!hostname) return true; // 无法提取 hostname（无有效 URL）→ 保守处理为不计时
+  if (BUILTIN_LOCAL_HOSTS.includes(hostname)) return true; // 本地环回地址
   const config = await getConfig();
   if (config.excludedDomains.some((d) => matchesDomain(hostname, d))) return true;
   if (matchesKeywords(title, config.titleKeywords)) return true;
