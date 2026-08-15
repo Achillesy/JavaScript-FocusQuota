@@ -1,11 +1,10 @@
 // FocusQuota — Service Worker（阶段 5：额度提醒 + 空闲检测）
 // 事件驱动计时 + chrome.alarms 周期结算兜底（防止 SW 被回收时丢失未结算时长）。
 import { getConfig, rolloverIfNeeded } from './js/storage.js';
-import { refresh, setIdleMark } from './js/timer.js';
+import { refresh, setIdleMark, IDLE_DETECT_SECONDS } from './js/timer.js';
 import { checkAndNotify, notifyOnNavigation } from './js/notify.js';
 
 const SETTLE_ALARM = 'focusquota-settle';
-const IDLE_DETECT_SECONDS = 60; // chrome.idle 检测间隔（秒），与 timer.js 保持一致
 
 console.log('[FocusQuota] Service Worker 已启动（阶段 5）');
 
@@ -22,7 +21,7 @@ console.log('[FocusQuota] Service Worker 已启动（阶段 5）');
     // 初始化空闲检测：设置检测间隔，并按当前系统状态设置空闲标记
     await chrome.idle.setDetectionInterval(IDLE_DETECT_SECONDS);
     const idleState = await chrome.idle.queryState(IDLE_DETECT_SECONDS);
-    setIdleMark(idleState === 'idle' || idleState === 'locked' ? Date.now() : null);
+    setIdleMark(idleState === 'idle' || idleState === 'locked');
     await refresh('init');
     await checkAndNotify(); // 初始化 badge（剩余分钟 / 满）
   } catch (err) {
@@ -30,14 +29,14 @@ console.log('[FocusQuota] Service Worker 已启动（阶段 5）');
   }
 })();
 
-// 空闲检测：人离开（无键鼠输入）达到阈值后停止计时；回来恢复
+// 空闲检测：人离开（约 1 分钟无输入）后停止计时；回来恢复
 chrome.idle.onStateChanged.addListener((state) => {
   if (state === 'active') {
-    setIdleMark(null);
+    setIdleMark(false);
     refresh('idle-active');
   } else {
-    // idle / locked：记录时刻，由 timer.js 按累计时长与有声兜底决定何时停止
-    setIdleMark(Date.now());
+    // idle / locked：直接标记空闲，由 timer.js 判定停止（有声页面除外）
+    setIdleMark(true);
     refresh('idle');
   }
 });
