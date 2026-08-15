@@ -1,16 +1,17 @@
-// FocusQuota — Service Worker（阶段 2：核心计时引擎）
+// FocusQuota — Service Worker（阶段 4：每日重置）
 // 事件驱动计时 + chrome.alarms 周期结算兜底（防止 SW 被回收时丢失未结算时长）。
-import { getConfig } from './js/storage.js';
+import { getConfig, rolloverIfNeeded } from './js/storage.js';
 import { refresh } from './js/timer.js';
 
 const SETTLE_ALARM = 'focusquota-settle';
 
-console.log('[FocusQuota] Service Worker 已启动（阶段 2）');
+console.log('[FocusQuota] Service Worker 已启动（阶段 4）');
 
-// 启动初始化：确保默认配置落盘、注册周期结算 alarm、立即刷新一次计时状态
+// 启动初始化：确保默认配置落盘、检查每日重置、注册周期结算 alarm、立即刷新一次计时状态
 (async function init() {
   try {
     await getConfig();
+    await rolloverIfNeeded(); // SW 启动时检查跨日（DESIGN.md 第 7 节）
     await chrome.alarms.create(SETTLE_ALARM, { periodInMinutes: 1 });
     await refresh('init');
   } catch (err) {

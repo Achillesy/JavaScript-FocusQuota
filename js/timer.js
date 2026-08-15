@@ -3,7 +3,7 @@
 // 保证同一时刻最多只有一个计时区间（DESIGN.md 第 12 节问题 A）。
 // 防睡眠误计（问题 C）：单区间超过 MAX_SESSION_MS 视为睡眠/系统时间异常，整段丢弃。
 // 持久化（问题 B）：结算后立即写入 chrome.storage.local（经 storage.js 封装）。
-import { getUsage, setUsage } from './storage.js';
+import { getUsage, setUsage, rolloverIfNeeded } from './storage.js';
 import { isExempt } from './exempt.js';
 
 // 单区间时长上限：超过视为睡眠/异常（建议数分钟内，IMPLEMENTATION.md 阶段 2）
@@ -36,6 +36,7 @@ async function currentTrackable() {
 
 // 结算当前计时区间：把 [sessionStart, now] 累加到 usageSeconds
 async function settle(reason) {
+  await rolloverIfNeeded(); // 每日重置：跨日先清零（DESIGN.md 第 7 节）
   const start = state.sessionStart;
   if (start === null) return;
   state.sessionStart = null; // 结算即关闭当前区间

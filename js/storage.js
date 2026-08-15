@@ -117,3 +117,20 @@ export async function setUsage(usage) {
   await chrome.storage.local.set({ [USAGE_KEY]: clean });
   return clean;
 }
+
+// ---- 每日重置 ----
+
+// 每日重置（DESIGN.md 第 7 节）：若 usageDate != 今日，则 usageSeconds=0、usageDate=今日。
+// 使用本地日期（YYYY-MM-DD），不使用 24 小时滚动窗口。
+// 重置逻辑集中于此函数，所有触发时机（计时结算 / SW 启动 / alarms）复用。
+export async function rolloverIfNeeded() {
+  const usage = await getUsage();
+  const today = todayString();
+  if (usage.usageDate !== today) {
+    const reset = { usageSeconds: 0, usageDate: today };
+    await chrome.storage.local.set({ [USAGE_KEY]: reset });
+    console.log('[storage] 每日重置：', reset);
+    return reset;
+  }
+  return usage; // 当日多次检查不会重复归零
+}
