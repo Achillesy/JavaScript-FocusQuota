@@ -20,6 +20,19 @@ const state = {
   activeTab: null, // { windowId, tabId, url, title } | null
 };
 
+// 空闲检测（防「人离开但 Chrome 窗口仍聚焦」时继续计时）：
+// chrome.idle 事件在系统无键鼠输入约 IDLE_DETECT_SECONDS 秒后触发（API 检测间隔上限 60 秒），
+// 再延迟到用户所选 IDLE_TOTAL_MS 才真正停止，避免静音阅读/浏览停顿被过早误停。
+// 有声页面（tab.audible）不判空闲：看视频/听音乐即使无输入也继续计时。
+const IDLE_DETECT_SECONDS = 60; // chrome.idle.setDetectionInterval 检测间隔（秒）
+const IDLE_TOTAL_MS = 3 * 60 * 1000; // 无输入总时长达到 3 分钟 → 停止
+let idleMarkedAt = null; // 空闲事件到达时刻；null = 活跃
+
+// 由 background 在 chrome.idle.onStateChanged 时调用：at 为事件时刻，null 表示恢复活跃
+function setIdleMark(at) {
+  idleMarkedAt = at;
+}
+
 // 串行化 refresh，避免并发事件交错导致结算/计时错乱
 let chain = Promise.resolve();
 function refresh(reason = 'event') {
@@ -36,6 +49,11 @@ async function currentTrackable() {
   if (!tab || tab.id === chrome.tabs.TAB_ID_NONE) return null;
   const win = await chrome.windows.get(tab.windowId);
   if (!win || !win.focused) return null; // 窗口失焦/最小化 → 不计时
+  // 空闲判定：无输入总时长达阈值且页面无声音 → 视为离开，不计时
+  if (idleMarkedAt !== null) {
+    const idleMs = Date.now() - idleMarkedAt + IDLE_DETECT_SECONDS * 1000;
+    if (idleMs >= IDLE_TOTAL_MS && !tab.audible) return null;
+  }
   if (await isExempt(tab.url, tab.title)) return null; // 豁免规则（阶段 3）
   return { windowId: tab.windowId, tabId: tab.id, url: tab.url, title: tab.title };
 }
@@ -87,4 +105,4 @@ async function doRefresh(reason) {
   }
 }
 
-export { refresh };
+export { refresh, setIdleMark };
