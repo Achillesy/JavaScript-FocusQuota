@@ -1,14 +1,38 @@
-// FocusQuota — Service Worker（阶段 1：配置与存储层）
-// 启动时确保默认配置写入 chrome.storage.local，供后续阶段读取。
-// 本阶段不做计时/豁免等业务逻辑。
+// FocusQuota — Service Worker（阶段 2：核心计时引擎）
+// 事件驱动计时 + chrome.alarms 周期结算兜底（防止 SW 被回收时丢失未结算时长）。
 import { getConfig } from './js/storage.js';
+import { refresh } from './js/timer.js';
 
-console.log('[FocusQuota] Service Worker 已启动（阶段 1）');
+const SETTLE_ALARM = 'focusquota-settle';
 
-getConfig()
-  .then((config) => {
-    console.log('[FocusQuota] 配置已就绪：', config);
-  })
-  .catch((err) => {
-    console.error('[FocusQuota] 初始化配置失败：', err);
-  });
+console.log('[FocusQuota] Service Worker 已启动（阶段 2）');
+
+// 启动初始化：确保默认配置落盘、注册周期结算 alarm、立即刷新一次计时状态
+(async function init() {
+  try {
+    await getConfig();
+    await chrome.alarms.create(SETTLE_ALARM, { periodInMinutes: 1 });
+    await refresh('init');
+  } catch (err) {
+    console.error('[FocusQuota] 初始化失败：', err);
+  }
+})();
+
+// 周期结算（每 1 分钟）：SW 被回收前兜底结算，未结算时长最多丢失 1 分钟
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === SETTLE_ALARM) refresh('alarm');
+});
+
+// 标签页切换
+chrome.tabs.onActivated.addListener(() => refresh('tab-activated'));
+
+// 窗口焦点变化（含最小化/失焦/聚焦）
+chrome.windows.onFocusChanged.addListener(() => refresh('window-focus'));
+
+// 标签页关闭
+chrome.tabs.onRemoved.addListener(() => refresh('tab-removed'));
+
+// 页面导航（URL 变化，含 SPA 路径跳转）；title 变化监听在阶段 3 加入
+chrome.tabs.onUpdated.addListener((_tabId, changeInfo) => {
+  if (changeInfo.url) refresh('tab-navigated');
+});
