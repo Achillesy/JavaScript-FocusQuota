@@ -1,23 +1,30 @@
-// FocusQuota — Service Worker（阶段 4：每日重置）
+// FocusQuota — Service Worker（阶段 5：额度提醒）
 // 事件驱动计时 + chrome.alarms 周期结算兜底（防止 SW 被回收时丢失未结算时长）。
 import { getConfig, rolloverIfNeeded } from './js/storage.js';
 import { refresh } from './js/timer.js';
+import { checkAndNotify } from './js/notify.js';
 
 const SETTLE_ALARM = 'focusquota-settle';
 
-console.log('[FocusQuota] Service Worker 已启动（阶段 4）');
+console.log('[FocusQuota] Service Worker 已启动（阶段 5）');
 
-// 启动初始化：确保默认配置落盘、检查每日重置、注册周期结算 alarm、立即刷新一次计时状态
+// 启动初始化：确保默认配置落盘、检查每日重置、注册周期结算 alarm、刷新计时状态、初始化 badge
 (async function init() {
   try {
     await getConfig();
     await rolloverIfNeeded(); // SW 启动时检查跨日（DESIGN.md 第 7 节）
     await chrome.alarms.create(SETTLE_ALARM, { periodInMinutes: 1 });
     await refresh('init');
+    await checkAndNotify(); // 初始化 badge（剩余分钟 / 满）
   } catch (err) {
     console.error('[FocusQuota] 初始化失败：', err);
   }
 })();
+
+// 配置变更（如用户调整额度）后立即刷新 badge/通知判定
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'local' && changes.config) checkAndNotify();
+});
 
 // 周期结算（每 1 分钟）：SW 被回收前兜底结算，未结算时长最多丢失 1 分钟
 chrome.alarms.onAlarm.addListener((alarm) => {

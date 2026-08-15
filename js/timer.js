@@ -5,6 +5,7 @@
 // 持久化（问题 B）：结算后立即写入 chrome.storage.local（经 storage.js 封装）。
 import { getUsage, setUsage, rolloverIfNeeded } from './storage.js';
 import { isExempt } from './exempt.js';
+import { checkAndNotify } from './notify.js';
 
 // 单区间时长上限：超过视为睡眠/异常（建议数分钟内，IMPLEMENTATION.md 阶段 2）
 const MAX_SESSION_MS = 5 * 60 * 1000;
@@ -52,6 +53,7 @@ async function settle(reason) {
   const usage = await getUsage();
   usage.usageSeconds += seconds;
   await setUsage(usage);
+  await checkAndNotify(); // 额度提醒：badge 更新 / 达到额度弹通知（阶段 5）
   console.log(`[timer] 结算 +${seconds}s（${reason}），今日累计 ${usage.usageSeconds}s`);
 }
 

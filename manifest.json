@@ -3,7 +3,7 @@
   "name": "FocusQuota",
   "version": "0.0.1",
   "description": "帮助您控制每天的普通上网时间——只提醒，不阻止。",
-  "permissions": ["storage", "tabs", "alarms"],
+  "permissions": ["storage", "tabs", "alarms", "notifications"],
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "FocusQuota",
