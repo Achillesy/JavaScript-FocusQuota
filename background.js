@@ -13,7 +13,11 @@ console.log('[FocusQuota] Service Worker 已启动（阶段 5）');
   try {
     await getConfig();
     await rolloverIfNeeded(); // SW 启动时检查跨日（DESIGN.md 第 7 节）
-    await chrome.alarms.create(SETTLE_ALARM, { periodInMinutes: 1 });
+    // 幂等创建周期结算 alarm：SW 每次唤醒都会执行 init，避免重复 create 重置周期
+    const existingAlarm = await chrome.alarms.get(SETTLE_ALARM);
+    if (!existingAlarm) {
+      await chrome.alarms.create(SETTLE_ALARM, { periodInMinutes: 1 });
+    }
     await refresh('init');
     await checkAndNotify(); // 初始化 badge（剩余分钟 / 满）
   } catch (err) {
