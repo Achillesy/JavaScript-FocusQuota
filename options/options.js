@@ -84,6 +84,11 @@ document.getElementById('save').addEventListener('click', async () => {
   }, 1000);
 });
 
+// 输入额度时实时同步 state，避免后续 render()（如增删列表项）覆盖用户输入
+document.getElementById('limit-input').addEventListener('input', (e) => {
+  state.dailyLimitMinutes = Number(e.target.value);
+});
+
 setupAdd('domain-input', 'domain-add', 'excludedDomains');
 setupAdd('keyword-input', 'keyword-add', 'titleKeywords');
 load();
