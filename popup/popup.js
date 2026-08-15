@@ -23,7 +23,8 @@ async function render() {
 }
 
 document.getElementById('open-options').addEventListener('click', () => {
-  chrome.runtime.openOptionsPage();
+  // 直接打开设置页 URL（tabs 权限已有），不依赖 options_ui 注册状态，更可靠
+  chrome.tabs.create({ url: chrome.runtime.getURL('options/options.html') });
 });
 
 // 打开时渲染；计时/配置变化时实时刷新（Popup 保持打开时数字同步）
