@@ -72,10 +72,16 @@ document.getElementById('save').addEventListener('click', async () => {
   render();
 
   const status = document.getElementById('save-status');
-  status.textContent = `已保存（额度 ${config.dailyLimitMinutes} 分钟）`;
-  setTimeout(() => {
-    status.textContent = '';
-  }, 2000);
+  status.textContent = `已保存（额度 ${config.dailyLimitMinutes} 分钟），即将关闭`;
+  // 短暂提示后自动关闭设置页
+  setTimeout(async () => {
+    const tab = await chrome.tabs.getCurrent();
+    if (tab && tab.id != null) {
+      chrome.tabs.remove(tab.id);
+    } else {
+      window.close();
+    }
+  }, 1000);
 });
 
 setupAdd('domain-input', 'domain-add', 'excludedDomains');

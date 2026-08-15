@@ -1,11 +1,15 @@
 // FocusQuota — 额度提醒（阶段 5）
-// 达到每日额度后：弹一次性系统通知 + 图标 badge 持续提示。
+// 达到每日额度后：弹系统通知 + 图标 badge 持续提示。
+// 达额后每次打开新网页（导航）时再次提醒（用户选择；含短去抖防连环导航连弹）。
 // 只提醒，绝不阻止访问（DESIGN.md 第 2.1 节：不重定向、不关标签页、不阻塞页面、不改网页内容）。
 import { getConfig, getUsage } from './storage.js';
 
 const NOTIFY_ID = 'focusquota-limit-reached';
 // 记录「今日已弹过额度通知」的日期，用于防打扰（同日只弹一次）
 const LIMIT_NOTIFIED_KEY = 'limitNotifiedDate';
+// 导航提醒最小间隔：避免同一导航的重定向/SPA 连环 URL 变化连弹
+const NAV_NOTIFY_MIN_MS = 10 * 1000;
+let lastNavNotifyAt = 0; // 内存记录；SW 重启后允许重新提醒，可接受
 
 // 判定并执行额度提醒。每次结算后 / SW 启动时 / 配置变更时调用。
 export async function checkAndNotify() {
@@ -41,5 +45,27 @@ export async function checkAndNotify() {
     const text = remaining > 999 ? '999+' : String(remaining);
     await chrome.action.setBadgeText({ text });
     await chrome.action.setBadgeBackgroundColor({ color: '#1a73e8' }); // 蓝色
+  }
+}
+
+// 达额后每次打开新网页（导航）时提醒；未达额或去抖窗口内忽略。
+export async function notifyOnNavigation() {
+  const config = await getConfig();
+  const usage = await getUsage();
+  if (usage.usageSeconds < config.dailyLimitMinutes * 60) return; // 未达额
+  const now = Date.now();
+  if (now - lastNavNotifyAt < NAV_NOTIFY_MIN_MS) return; // 去抖
+  lastNavNotifyAt = now;
+  try {
+    await chrome.notifications.create(NOTIFY_ID, {
+      type: 'basic',
+      iconUrl: 'icons/icon128.png',
+      title: 'FocusQuota',
+      message: `今日普通上网时间已达额度（${config.dailyLimitMinutes} 分钟）。仅提醒，不阻止访问。`,
+      priority: 1,
+    });
+    console.log('[notify] 已达额：打开新网页提醒');
+  } catch (err) {
+    console.warn('[notify] 通知发送失败：', err);
   }
 }

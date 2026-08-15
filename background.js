@@ -2,7 +2,7 @@
 // 事件驱动计时 + chrome.alarms 周期结算兜底（防止 SW 被回收时丢失未结算时长）。
 import { getConfig, rolloverIfNeeded } from './js/storage.js';
 import { refresh } from './js/timer.js';
-import { checkAndNotify } from './js/notify.js';
+import { checkAndNotify, notifyOnNavigation } from './js/notify.js';
 
 const SETTLE_ALARM = 'focusquota-settle';
 
@@ -43,6 +43,10 @@ chrome.tabs.onRemoved.addListener(() => refresh('tab-removed'));
 // 页面导航（URL 变化，含 SPA 路径跳转）与 title 变化（SPA 标题更新）。
 // 两者都会改变豁免判定结果，需触发重新评估；不注入网页脚本（DESIGN.md 第 5 节）。
 chrome.tabs.onUpdated.addListener((_tabId, changeInfo) => {
-  if (changeInfo.url) refresh('tab-navigated');
-  else if (changeInfo.title) refresh('tab-title');
+  if (changeInfo.url) {
+    refresh('tab-navigated');
+    notifyOnNavigation(); // 达额后每次打开新网页提醒
+  } else if (changeInfo.title) {
+    refresh('tab-title');
+  }
 });
