@@ -4,6 +4,7 @@
 // 防睡眠误计（问题 C）：单区间超过 MAX_SESSION_MS 视为睡眠/系统时间异常，整段丢弃。
 // 持久化（问题 B）：结算后立即写入 chrome.storage.local（经 storage.js 封装）。
 import { getUsage, setUsage } from './storage.js';
+import { isExempt } from './exempt.js';
 
 // 单区间时长上限：超过视为睡眠/异常（建议数分钟内，IMPLEMENTATION.md 阶段 2）
 const MAX_SESSION_MS = 5 * 60 * 1000;
@@ -22,15 +23,6 @@ function refresh(reason = 'event') {
   return chain;
 }
 
-// 特殊页面最小判定（阶段 2；完整豁免规则在阶段 3 实现）
-// 这些页面默认不计入普通浏览时间（DESIGN.md 第 14 节）
-function isSpecialPage(url) {
-  if (!url) return true;
-  return /^(chrome|chrome-extension|about|devtools|edge|view-source|file|blob|data|javascript):/i.test(
-    url
-  );
-}
-
 // 查询当前应计时的页面；返回 null 表示不应计时
 async function currentTrackable() {
   const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
@@ -38,7 +30,7 @@ async function currentTrackable() {
   if (!tab || tab.id === chrome.tabs.TAB_ID_NONE) return null;
   const win = await chrome.windows.get(tab.windowId);
   if (!win || !win.focused) return null; // 窗口失焦/最小化 → 不计时
-  if (isSpecialPage(tab.url)) return null;
+  if (await isExempt(tab.url, tab.title)) return null; // 豁免规则（阶段 3）
   return { windowId: tab.windowId, tabId: tab.id, url: tab.url, title: tab.title };
 }
 

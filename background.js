@@ -32,7 +32,9 @@ chrome.windows.onFocusChanged.addListener(() => refresh('window-focus'));
 // 标签页关闭
 chrome.tabs.onRemoved.addListener(() => refresh('tab-removed'));
 
-// 页面导航（URL 变化，含 SPA 路径跳转）；title 变化监听在阶段 3 加入
+// 页面导航（URL 变化，含 SPA 路径跳转）与 title 变化（SPA 标题更新）。
+// 两者都会改变豁免判定结果，需触发重新评估；不注入网页脚本（DESIGN.md 第 5 节）。
 chrome.tabs.onUpdated.addListener((_tabId, changeInfo) => {
   if (changeInfo.url) refresh('tab-navigated');
+  else if (changeInfo.title) refresh('tab-title');
 });
