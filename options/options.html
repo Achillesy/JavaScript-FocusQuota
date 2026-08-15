@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>FocusQuota 设置</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <h1>FocusQuota 设置</h1>
+
+    <section>
+      <h2>每日额度</h2>
+      <p class="hint">每天普通上网时间的上限（分钟），达到后仅提醒、不阻止访问。</p>
+      <label for="limit-input">每日额度（分钟）</label>
+      <input type="number" id="limit-input" min="1" step="1">
+    </section>
+
+    <section>
+      <h2>域名白名单</h2>
+      <p class="hint">这些网站不计入普通浏览时间（如 chatgpt.com）。</p>
+      <ul id="domain-list"></ul>
+      <div class="add-row">
+        <input type="text" id="domain-input" placeholder="例如 chatgpt.com">
+        <button id="domain-add">添加</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>标题关键词</h2>
+      <p class="hint">页面标题包含任一关键词则不计时（如 Blender），不区分大小写。</p>
+      <ul id="keyword-list"></ul>
+      <div class="add-row">
+        <input type="text" id="keyword-input" placeholder="例如 Blender">
+        <button id="keyword-add">添加</button>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button id="save">保存</button>
+      <span id="save-status"></span>
+    </div>
+  </div>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

@@ -1,7 +1,7 @@
-/* FocusQuota — Popup 样式（阶段 0：最小占位样式） */
+/* FocusQuota — Popup 样式（阶段 6） */
 
 body {
-  width: 280px;
+  width: 300px;
   margin: 0;
   font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
   background: #f7f8fa;
@@ -13,20 +13,60 @@ body {
 }
 
 h1 {
-  margin: 0 0 4px 0;
+  margin: 0 0 12px 0;
   font-size: 18px;
   color: #2f6fed;
 }
 
-.version {
-  margin: 0 0 12px 0;
+.usage {
+  background: #fff;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.label {
+  margin: 0 0 6px 0;
   font-size: 12px;
   color: #6a737d;
 }
 
-.placeholder {
+.numbers {
+  margin: 0 0 6px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.remaining {
   margin: 0;
   font-size: 13px;
-  line-height: 1.6;
-  color: #444;
+  color: #1a73e8;
+}
+
+.remaining.over {
+  color: #d93025;
+  font-weight: 600;
+}
+
+#open-options {
+  margin-top: 12px;
+  width: 100%;
+  padding: 8px 0;
+  border: 1px solid #2f6fed;
+  background: #2f6fed;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+#open-options:hover {
+  background: #2658c7;
+}
+
+.version {
+  margin: 10px 0 0 0;
+  font-size: 11px;
+  color: #959da5;
+  text-align: right;
 }

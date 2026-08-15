@@ -8,9 +8,14 @@
 <body>
   <div class="container">
     <h1>FocusQuota</h1>
-    <p class="version">版本 <span id="version"></span></p>
-    <p class="placeholder">阶段 0 骨架：配置、计时与豁免功能将在后续阶段加入。</p>
+    <div class="usage">
+      <p class="label">今日普通上网时间</p>
+      <p class="numbers"><span id="used-min">0</span> / <span id="limit-min">0</span> 分钟</p>
+      <p class="remaining" id="remaining">剩余 <span id="remaining-min">0</span> 分钟</p>
+    </div>
+    <button id="open-options">打开设置</button>
+    <p class="version">v<span id="version"></span></p>
   </div>
-  <script src="popup.js"></script>
+  <script type="module" src="popup.js"></script>
 </body>
 </html>
