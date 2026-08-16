@@ -71,17 +71,13 @@ document.getElementById('save').addEventListener('click', async () => {
   state.titleKeywords = [...config.titleKeywords];
   render();
 
-  const status = document.getElementById('save-status');
-  status.textContent = `已保存（额度 ${config.dailyLimitMinutes} 分钟），即将关闭`;
-  // 短暂提示后自动关闭设置页
-  setTimeout(async () => {
-    const tab = await chrome.tabs.getCurrent();
-    if (tab && tab.id != null) {
-      chrome.tabs.remove(tab.id);
-    } else {
-      window.close();
-    }
-  }, 1000);
+  // 保存即视为用户已决心离开设置页，立即关闭，无需固定延时等待
+  const tab = await chrome.tabs.getCurrent();
+  if (tab && tab.id != null) {
+    chrome.tabs.remove(tab.id);
+  } else {
+    window.close();
+  }
 });
 
 // 输入额度时实时同步 state，避免后续 render()（如增删列表项）覆盖用户输入

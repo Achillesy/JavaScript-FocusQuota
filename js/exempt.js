@@ -1,7 +1,7 @@
 // FocusQuota — 豁免规则（阶段 3）
 // 三类豁免：特殊页面 scheme / 域名白名单 / 标题关键词。
-// 判定每次实时读取配置（getConfig），配置变更后下一次评估立即生效。
-import { getConfig } from './storage.js';
+// config 由调用方（timer.js）在一次 refresh 周期内读取一次后传入，避免每次判定
+// 都重复访问 chrome.storage.local；配置变更后下一次 refresh 周期立即生效。
 
 // 特殊页面 scheme：一律不计入普通浏览时间（DESIGN.md 第 14 节）
 const SPECIAL_SCHEME_RE =
@@ -71,12 +71,12 @@ function matchesKeywords(title, keywords) {
 }
 
 // 综合豁免判定：返回 true 表示该页面不消耗普通浏览时间
-export async function isExempt(url, title) {
+// config 为调用方已读取好的配置对象（不再内部读取 storage，纯同步计算）。
+export function isExempt(url, title, config) {
   if (isSpecialPage(url)) return true;
   const hostname = extractHostname(url);
   if (!hostname) return true; // 无法提取 hostname（无有效 URL）→ 保守处理为不计时
   if (BUILTIN_LOCAL_HOSTS.includes(hostname)) return true; // 本地环回地址
-  const config = await getConfig();
   if (config.excludedDomains.some((d) => matchesDomain(hostname, d))) return true;
   if (matchesKeywords(title, config.titleKeywords)) return true;
   return false;

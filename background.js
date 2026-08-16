@@ -62,10 +62,13 @@ chrome.tabs.onRemoved.addListener(() => refresh('tab-removed'));
 
 // 页面导航（URL 变化，含 SPA 路径跳转）与 title 变化（SPA 标题更新）。
 // 两者都会改变豁免判定结果，需触发重新评估；不注入网页脚本（DESIGN.md 第 5 节）。
-chrome.tabs.onUpdated.addListener((_tabId, changeInfo) => {
+chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
   if (changeInfo.url) {
-    refresh('tab-navigated');
-    notifyOnNavigation(); // 达额后每次打开新网页提醒
+    // 先等 refresh 完成结算/每日重置，再读取导航提醒判定，避免读到跨日边界的脏数据；
+    // 且只对用户正在查看的激活标签页提醒——后台标签页自动刷新/跳转不应打扰用户。
+    refresh('tab-navigated').then(() => {
+      if (tab.active) notifyOnNavigation();
+    });
   } else if (changeInfo.title) {
     refresh('tab-title');
   }

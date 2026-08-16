@@ -12,15 +12,19 @@ const NAV_NOTIFY_MIN_MS = 10 * 1000;
 let lastNavNotifyAt = 0; // 内存记录；SW 重启后允许重新提醒，可接受
 
 // 判定并执行额度提醒。每次结算后 / SW 启动时 / 配置变更时调用。
-export async function checkAndNotify() {
-  const config = await getConfig();
-  const usage = await getUsage();
+// config/usage 可选：调用方若在同一 refresh 周期内已读取过，可直接传入避免重复读 storage；
+// 省略时（如 SW 初始化、配置变更监听）内部自行读取最新值。
+export async function checkAndNotify(config, usage) {
+  config = config ?? (await getConfig());
+  usage = usage ?? (await getUsage());
   const limitSeconds = config.dailyLimitMinutes * 60;
   const over = usage.usageSeconds >= limitSeconds;
 
   if (over) {
-    // 持续提示：badge 显示「满」
-    await chrome.action.setBadgeText({ text: '满' });
+    // 持续提示：达额后 badge 继续显示已用分钟数（红色），让用户看到超出/累计进度
+    const usedMin = Math.ceil(usage.usageSeconds / 60);
+    const text = usedMin > 999 ? '999+' : String(usedMin);
+    await chrome.action.setBadgeText({ text });
     await chrome.action.setBadgeBackgroundColor({ color: '#d93025' }); // 红色
     // 防打扰：同一天只弹一次通知，之后以 badge 持续提示
     const stored = await chrome.storage.local.get(LIMIT_NOTIFIED_KEY);
@@ -56,12 +60,13 @@ export async function notifyOnNavigation() {
   const now = Date.now();
   if (now - lastNavNotifyAt < NAV_NOTIFY_MIN_MS) return; // 去抖
   lastNavNotifyAt = now;
+  const usedMinutes = Math.ceil(usage.usageSeconds / 60);
   try {
     await chrome.notifications.create(NOTIFY_ID, {
       type: 'basic',
       iconUrl: 'icons/icon128.png',
       title: 'FocusQuota',
-      message: `今日普通上网时间已达额度（${config.dailyLimitMinutes} 分钟）。仅提醒，不阻止访问。`,
+      message: `今日上网时长已经达到 ${usedMinutes} 分钟，超过限制额度(${config.dailyLimitMinutes} 分钟)`,
       priority: 1,
     });
     console.log('[notify] 已达额：打开新网页提醒');
