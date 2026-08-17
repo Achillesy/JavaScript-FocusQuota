@@ -61,12 +61,16 @@ export async function notifyOnNavigation() {
   if (now - lastNavNotifyAt < NAV_NOTIFY_MIN_MS) return; // 去抖
   lastNavNotifyAt = now;
   const usedMinutes = Math.ceil(usage.usageSeconds / 60);
+  const overMinutes = Math.max(
+    0,
+    Math.ceil((usage.usageSeconds - config.dailyLimitMinutes * 60) / 60)
+  );
   try {
     await chrome.notifications.create(NOTIFY_ID, {
       type: 'basic',
       iconUrl: 'icons/icon128.png',
       title: 'FocusQuota',
-      message: `今日上网时长已经达到 ${usedMinutes} 分钟，超过限制额度(${config.dailyLimitMinutes} 分钟)`,
+      message: `今日上网时长已经达到 ${usedMinutes} 分钟，超过限制额度 ${overMinutes} 分钟`,
       priority: 1,
     });
     console.log('[notify] 已达额：打开新网页提醒');
