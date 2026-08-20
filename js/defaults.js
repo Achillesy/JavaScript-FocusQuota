@@ -1,3 +1,7 @@
+// FocusQuota - Copyright (C) 2026 Achilles Newman
+// SPDX-License-Identifier: GPL-3.0-or-later
+// 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+
 // FocusQuota — 默认配置（全项目唯一默认值定义处）
 // 约束（IMPLEMENTATION.md 阶段 1）：所有默认值只存在于本文件，
 // 全项目不得在其他地方再次硬编码这些默认值。

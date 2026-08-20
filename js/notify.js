@@ -1,3 +1,7 @@
+// FocusQuota - Copyright (C) 2026 Achilles Newman
+// SPDX-License-Identifier: GPL-3.0-or-later
+// 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+
 // FocusQuota — 额度提醒（阶段 5）
 // 达到每日额度后：弹系统通知 + 图标 badge 持续提示。
 // 达额后每次打开新网页（导航）时再次提醒（用户选择；含短去抖防连环导航连弹）。

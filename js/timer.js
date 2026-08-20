@@ -1,3 +1,7 @@
+// FocusQuota - Copyright (C) 2026 Achilles Newman
+// SPDX-License-Identifier: GPL-3.0-or-later
+// 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+
 // FocusQuota — 计时引擎（阶段 2：核心计时）
 // 状态机：idle / timing。单一计时区间，「是否应计时」发生真正翻转时才结算旧区间、开新区间，
 // 保证同一时刻最多只有一个计时区间（DESIGN.md 第 12 节问题 A）。

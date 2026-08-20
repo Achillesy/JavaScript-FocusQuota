@@ -1,3 +1,7 @@
+// FocusQuota - Copyright (C) 2026 Achilles Newman
+// SPDX-License-Identifier: GPL-3.0-or-later
+// 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+
 // FocusQuota — Popup（阶段 6）：展示今日使用/额度/剩余
 // 与 Service Worker 共用 js/storage.js，storage 为单一数据源。
 import { getConfig, getUsage } from '../js/storage.js';

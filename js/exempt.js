@@ -1,3 +1,7 @@
+// FocusQuota - Copyright (C) 2026 Achilles Newman
+// SPDX-License-Identifier: GPL-3.0-or-later
+// 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+
 // FocusQuota — 豁免规则（阶段 3）
 // 三类豁免：特殊页面 scheme / 域名白名单 / 标题关键词。
 // config 由调用方（timer.js）在一次 refresh 周期内读取一次后传入，避免每次判定

@@ -1,3 +1,7 @@
+// FocusQuota - Copyright (C) 2026 Achilles Newman
+// SPDX-License-Identifier: GPL-3.0-or-later
+// 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+
 // FocusQuota — Options（阶段 6）：编辑每日额度 / 域名白名单 / 标题关键词
 // 复用 js/storage.js（setConfig 负责校验），storage 为单一数据源。
 import { getConfig, setConfig } from '../js/storage.js';

@@ -1,3 +1,7 @@
+// FocusQuota - Copyright (C) 2026 Achilles Newman
+// SPDX-License-Identifier: GPL-3.0-or-later
+// 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+
 // FocusQuota — chrome.storage.local 读写封装与校验
 // 阶段 1：配置（config）与统计（usage）的存取统一走本模块。
 // storage.local 为单一数据源；非法输入在此处被修正或回退默认值。
