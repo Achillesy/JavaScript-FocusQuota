@@ -306,7 +306,7 @@ FocusQuota 完全免费，也永远免费。如果你觉得它帮你管住了刷
 
 | 微信 | 支付宝 |
 | --- | --- |
-| <img src="sponsor/wechat.jpg" width="200"> | <img src="sponsor/alipay.jpg" width="200"> |
+| <img src="sponsor/wechat.jpg?v=2" width="200"> | <img src="sponsor/alipay.jpg?v=2" width="200"> |
 
 赞助完全自愿，不影响任何功能。
 
