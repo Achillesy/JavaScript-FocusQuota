@@ -300,6 +300,7 @@ FocusQuota/
 FocusQuota 完全免费，也永远免费。如果你觉得它帮你管住了刷网页的手，欢迎请作者喝杯咖啡：
 
 - ☕ [Ko-fi](https://ko-fi.com/achillesy)（海外，支持 PayPal）
+- 💸 [PayPal 直接打赏](https://paypal.me/achillesnewman)
 
 赞助完全自愿，不影响任何功能。
 
