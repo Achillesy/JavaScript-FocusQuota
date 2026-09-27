@@ -2,8 +2,14 @@
   "manifest_version": 3,
   "name": "FocusQuota",
   "version": "1.0.0",
-  "description": "帮助您控制每天的普通上网时间——只提醒，不阻止。",
-  "permissions": ["storage", "tabs", "alarms", "notifications", "idle"],
+  "description": "A gentle daily quota for casual browsing — reminds, never blocks.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "alarms",
+    "notifications",
+    "idle"
+  ],
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "FocusQuota",
