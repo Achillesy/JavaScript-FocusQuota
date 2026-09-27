@@ -20,6 +20,7 @@ FocusQuota 是一个基于 Chrome Manifest V3 的浏览时间统计与提醒扩�
 - [隐私说明](#隐私说明)
 - [常见问题](#常见问题)
 - [项目结构](#项目结构)
+- [赞助](#赞助)
 - [许可证与名称使用](#许可证与名称使用)
 
 ---
@@ -291,6 +292,16 @@ FocusQuota/
 ```
 
 设计取舍与实现细节见 [DESIGN.md](DESIGN.md) 与 [IMPLEMENTATION.md](IMPLEMENTATION.md)。
+
+---
+
+## 赞助
+
+FocusQuota 完全免费，也永远免费。如果你觉得它帮你管住了刷网页的手，欢迎请作者喝杯咖啡：
+
+- ☕ [Ko-fi](https://ko-fi.com/achillesy)（海外，支持 PayPal）
+
+赞助完全自愿，不影响任何功能。
 
 ---
 

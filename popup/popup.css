@@ -76,3 +76,19 @@ h1 {
   color: #959da5;
   text-align: right;
 }
+
+.sponsor-link {
+  margin: 8px 0 0 0;
+  font-size: 11px;
+  text-align: center;
+}
+
+.sponsor-link a {
+  color: #6a737d;
+  text-decoration: none;
+}
+
+.sponsor-link a:hover {
+  color: #2f6fed;
+  text-decoration: underline;
+}

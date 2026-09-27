@@ -139,3 +139,19 @@ button.remove:hover {
 #save:hover {
   background: #2658c7;
 }
+
+.sponsor {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: #6a737d;
+}
+
+.sponsor a {
+  color: #2f6fed;
+  text-decoration: none;
+}
+
+.sponsor a:hover {
+  text-decoration: underline;
+}
