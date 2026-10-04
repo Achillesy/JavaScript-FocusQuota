@@ -1,7 +1,8 @@
 # FocusQuota — Chrome Web Store 上架资料
 
 > 填写顺序：Store listing → Privacy practices → Distribution。
-> 截图与宣传图在本目录：`shot_options.png`、`shot_popup.png`（1280×800）、`promo_440x280.png`（440×280）。
+> 截图与宣传图在本目录：`shot_options.png`、`shot_popup.png`（1280×800，英文版）、`promo_440x280.png`（440×280）。
+> 中文版截图为 `shot_options_zh.png`、`shot_popup_zh.png`（供中文版 listing 用）。
 
 ## Store listing
 
