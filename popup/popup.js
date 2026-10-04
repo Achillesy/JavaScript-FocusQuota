@@ -5,6 +5,7 @@
 // FocusQuota — Popup（阶段 6）：展示今日使用/额度/剩余
 // 与 Service Worker 共用 js/storage.js，storage 为单一数据源。
 import { getConfig, getUsage } from '../js/storage.js';
+import { applyI18n } from '../js/i18n.js';
 
 async function render() {
   const config = await getConfig();
@@ -20,7 +21,9 @@ async function render() {
   document.getElementById('remaining-min').textContent = String(remainingMin);
 
   const remainingEl = document.getElementById('remaining');
-  remainingEl.textContent = over ? '今日额度已用完' : `剩余 ${remainingMin} 分钟`;
+  remainingEl.textContent = over
+    ? chrome.i18n.getMessage('popupQuotaUsedUp')
+    : chrome.i18n.getMessage('popupRemaining', [String(remainingMin)]);
   remainingEl.classList.toggle('over', over);
 
   document.getElementById('version').textContent = chrome.runtime.getManifest().version;
@@ -36,4 +39,5 @@ document.getElementById('open-options').addEventListener('click', () => {
 // 打开时渲染；计时/配置变化时实时刷新（Popup 保持打开时数字同步）
 chrome.storage.onChanged.addListener(() => render());
 
+applyI18n();
 render();

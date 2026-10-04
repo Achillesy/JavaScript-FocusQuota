@@ -38,7 +38,9 @@ export async function checkAndNotify(config, usage) {
           type: 'basic',
           iconUrl: 'icons/icon128.png',
           title: 'FocusQuota',
-          message: `今日普通上网时间已达到 ${config.dailyLimitMinutes} 分钟。仅提醒，不阻止访问。`,
+          message: chrome.i18n.getMessage('notifyLimitReached', [
+            String(config.dailyLimitMinutes),
+          ]),
           priority: 1,
         });
       } catch (err) {
@@ -74,7 +76,10 @@ export async function notifyOnNavigation() {
       type: 'basic',
       iconUrl: 'icons/icon128.png',
       title: 'FocusQuota',
-      message: `今日上网时长已经达到 ${usedMinutes} 分钟，超过限制额度 ${overMinutes} 分钟`,
+      message: chrome.i18n.getMessage('notifyOverQuota', [
+        String(usedMinutes),
+        String(overMinutes),
+      ]),
       priority: 1,
     });
     console.log('[notify] 已达额：打开新网页提醒');

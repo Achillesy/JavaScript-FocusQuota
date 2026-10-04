@@ -5,6 +5,7 @@
 // FocusQuota — Options（阶段 6）：编辑每日额度 / 域名白名单 / 标题关键词
 // 复用 js/storage.js（setConfig 负责校验），storage 为单一数据源。
 import { getConfig, setConfig } from '../js/storage.js';
+import { applyI18n } from '../js/i18n.js';
 
 const state = {
   dailyLimitMinutes: 120,
@@ -19,7 +20,7 @@ function renderList(ulId, items, onRemove) {
     const li = document.createElement('li');
     li.textContent = item;
     const btn = document.createElement('button');
-    btn.textContent = '删除';
+    btn.textContent = chrome.i18n.getMessage('optionsRemove');
     btn.className = 'remove';
     btn.addEventListener('click', () => onRemove(item));
     li.appendChild(btn);
@@ -91,4 +92,12 @@ document.getElementById('limit-input').addEventListener('input', (e) => {
 
 setupAdd('domain-input', 'domain-add', 'excludedDomains');
 setupAdd('keyword-input', 'keyword-add', 'titleKeywords');
+
+applyI18n();
+
+// 非中文界面隐藏仅限国内的赞助二维码（微信/支付宝），Ko-fi 链接保留
+if (!chrome.i18n.getUILanguage().startsWith('zh')) {
+  document.querySelectorAll('.sponsor-cn, .sponsor-qr').forEach((el) => el.remove());
+}
+
 load();
