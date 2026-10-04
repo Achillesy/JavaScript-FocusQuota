@@ -1,5 +1,375 @@
 # FocusQuota
 
+> A gentle daily quota for casual browsing — gentler than a Pomodoro timer. Reminds, never blocks.
+
+*[中文版](#中文版)*
+
+FocusQuota is a browsing-time tracker and reminder extension built on Chrome Manifest V3.
+You set a daily "casual browsing" quota for yourself (default: 120 minutes), and the extension quietly tracks time in the background.
+When the quota runs out, it only nudges you with a system notification and a toolbar badge — it will **never** close your tabs, redirect pages, or block access.
+
+Work and study sites can be whitelisted or exempted by title keyword, so they don't eat into your quota.
+
+---
+
+## Contents
+
+- [Who it's for](#who-its-for)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Settings in detail](#settings-in-detail)
+- [Privacy](#privacy)
+- [FAQ](#faq)
+- [Project structure](#project-structure)
+- [Sponsor](#sponsor)
+- [License & name usage](#license--name-usage)
+
+---
+
+## Who it's for
+
+### Good fit
+
+- People who want a daily cap on "doomscrolling" but **don't want to be force-blocked**.
+- People whose work/study and entertainment share one browser and want the two kinds of time tracked separately.
+- People who want a **fully local, offline, no-data-upload** time tracker.
+
+### Supported browsers
+
+| Browser | Support |
+| --- | --- |
+| Google Chrome (88+, MV3) | ✅ Tested |
+| Microsoft Edge (Chromium) | ✅ Install via "Load unpacked" the same way |
+| Other Chromium browsers (Brave / Vivaldi, …) | ⚠️ Should work in theory, not tested one by one |
+| Firefox / Safari | ❌ Not supported (extension APIs differ) |
+
+OS: Windows / macOS / Linux, desktop browsers. Mobile Chrome doesn't support extensions.
+
+### What counts toward the quota
+
+Time is counted only when **all** of these hold:
+
+1. It's the **active tab**;
+2. The tab's **window is focused** (minimized, switched to another app or window → not counted);
+3. **You're at the computer** (~1 minute without keyboard/mouse input counts as away and pauses timing; pages playing audio are exempt — watching videos or listening to music won't mark you away);
+4. The page is **not exempt**.
+
+### What doesn't count (exemptions)
+
+- **Special pages**: `chrome://`, extension pages, `about:`, DevTools, `file:`, `view-source:` — never counted.
+- **Local addresses**: `localhost`, `127.0.0.1`, `::1`, `0.0.0.0` are built-in exemptions — local dev never eats into browsing time.
+- **Domain whitelist**: your own list; supports bare domains (`chatgpt.com` also matches `www.chatgpt.com`) and IPv4 ranges (`192.168.31.0/24`).
+- **Title keywords**: a page whose title contains any keyword is exempt, case-insensitive. E.g. adding `Blender` means Blender tutorials on YouTube don't consume quota either.
+
+### What it will never do
+
+No blocking, no tab closing, no redirects, no block pages, no page modification, no content scripts injected.
+When the quota is reached, it **only reminds**.
+
+---
+
+## Features
+
+- **Daily quota**: configurable minutes, auto-resets at local midnight every day (not a rolling 24-hour window).
+- **Live toolbar badge**: blue remaining minutes before the quota is reached; red used-minutes after.
+- **Quota notifications**: one system notification on the day's first hit; afterwards one reminder each time you **open a new page in the current tab** (10-second debounce against redirect bursts), e.g. "You've browsed for 208 minutes today, 88 minutes over your quota".
+- **Popup panel**: click the toolbar icon to see today's used / quota / remaining, updated live.
+- **UI language**: English UI since v1.1.0, follows the browser language automatically (Chrome's standard `_locales` mechanism); English is the default since v1.1.1, and unlisted languages fall back to English.
+- **Miscount guards**:
+  - over-long sessions from sleep or clock anomalies (>30 min) are discarded wholesale;
+  - session start timestamps are persisted to local storage, so settlement stays correct even after the browser reclaims the Service Worker;
+  - a once-per-minute safety-net settlement — at most 1 minute is ever lost.
+
+---
+
+## Installation
+
+### Option 1: Chrome Web Store (recommended)
+
+The extension is published on the Chrome Web Store — install it directly:
+
+**[FocusQuota – Chrome Web Store](https://chromewebstore.google.com/detail/pjmaoknjkfbammiflaijahjefagjhakc)**
+
+The store version auto-updates; nothing to do manually.
+
+### Option 2: Load unpacked (developers)
+
+For installing from source only. This uses Chrome's built-in developer feature — no account, no payment needed.
+
+### Step 1: Get the source
+
+**A: git clone (recommended, easy to update later)**
+
+```bash
+git clone https://github.com/Achillesy/JavaScript-FocusQuota.git
+```
+
+**B: Download ZIP**
+
+Open https://github.com/Achillesy/JavaScript-FocusQuota → click the green **Code** button → **Download ZIP** → extract.
+
+> ⚠️ **Important**: put the folder somewhere **permanent — never in Downloads, temp folders, or the trash** (e.g. `D:\Tools\FocusQuota`).
+> Chrome only **references** this path; if the folder is moved or deleted, the extension breaks.
+
+After extracting/cloning, you should see `manifest.json` right inside that folder:
+
+```
+FocusQuota/
+├── manifest.json      ← must be at this level
+├── background.js
+├── icons/
+├── js/
+├── options/
+└── popup/
+```
+
+If the ZIP extracts to a double-nested `JavaScript-FocusQuota-master/FocusQuota/...`,
+pick the inner folder that contains `manifest.json` in the next step.
+
+### Step 2: Open the extensions page
+
+Type in Chrome's address bar and hit Enter:
+
+```
+chrome://extensions
+```
+
+(Edge users: `edge://extensions`.)
+
+Or via menu: **⋮** → **Extensions** → **Manage Extensions**.
+
+### Step 3: Enable Developer mode
+
+Top-right corner of the extensions page: turn on **Developer mode**.
+Three new buttons appear top-left: **Load unpacked**, **Pack extension**, **Update**.
+
+### Step 4: Load the extension
+
+1. Click **Load unpacked**;
+2. Select the folder **containing `manifest.json`** from Step 1 (the folder itself, not a file inside);
+3. Click "Select Folder".
+
+**FocusQuota** now appears in the list, enabled.
+
+### Step 5: Pin the icon to the toolbar
+
+Click the **puzzle icon** on Chrome's toolbar → find FocusQuota → click the **pin** icon.
+Only pinned can you see the remaining-minutes badge at a glance.
+
+### Step 6: Allow notifications (recommended check)
+
+Quota reminders need system notifications. If you never see one, check:
+
+- **Windows**: Settings → System → Notifications → make sure Google Chrome is allowed, and turn off Focus Assist / Do Not Disturb.
+- **macOS**: System Settings → Notifications → Google Chrome → Allow Notifications.
+
+---
+
+### About the "developer mode extensions" banner (Option 2 only)
+
+Every Chrome launch may show: "**Disable developer mode extensions**".
+This is Chrome's standard nag for all unpacked extensions — just click ✕ to dismiss; it doesn't affect the extension, and don't click "Disable". The store version has no such banner.
+
+### Updating
+
+- **Store version**: Chrome auto-updates; nothing to do.
+- **git clone**: `git pull` in the project folder, then hit the **refresh (↻)** button on the FocusQuota card at `chrome://extensions`.
+- **ZIP download**: re-download and **overwrite the same folder** (keep the path unchanged), then refresh the same way.
+
+### Uninstall
+
+At `chrome://extensions`, find FocusQuota → **Remove**. All local data is deleted with it.
+
+---
+
+## Usage
+
+### Check today's usage
+
+Click the FocusQuota toolbar icon. The popup shows:
+
+- minutes used today / daily quota;
+- minutes remaining ("Today's quota is used up" once exhausted).
+
+The badge normally shows **remaining minutes** (blue); after the quota is hit it switches to **used minutes** (red).
+
+### Open settings
+
+Click "**Open settings**" in the popup, or "Extension options" on the FocusQuota card at `chrome://extensions`.
+
+![FocusQuota settings page](screenshots/Settings.png)
+
+Three sections: **Daily quota**, **Domain whitelist**, **Title keywords**.
+You must click "**Save**" — the page closes itself on success, and the new config takes effect within the next timing cycle (≤ 1 minute).
+Bottom-right of the screenshot shows a sample quota-reached system notification.
+
+---
+
+## Settings in detail
+
+### Daily quota (minutes)
+
+Your daily cap on casual browsing. Must be a **positive integer**; invalid input (0, negative, decimal, empty) falls back to the default **120** on save.
+
+### Domain whitelist
+
+Matching sites don't consume quota. Defaults: `chatgpt.com`, `deepseek.com`, `doubao.com`.
+
+| Input | Matches |
+| --- | --- |
+| `chatgpt.com` | `chatgpt.com` and all subdomains (`www.chatgpt.com`, `api.chatgpt.com`) |
+| `docs.google.com` | that subdomain and its children only |
+| `192.168.31.0/24` | every address in the IPv4 range (handy for intranet services) |
+
+Note: `notchatgpt.com` is **not** matched by `chatgpt.com` (suffix match must align on dot boundaries).
+`localhost` / `127.0.0.1` / `::1` / `0.0.0.0` are built-in exemptions — no need to add them.
+
+### Title keywords
+
+A page whose **title contains** any keyword is not timed, **case-insensitive**. Default: `Blender`.
+
+Typical use: watching tutorials on YouTube or Bilibili — use the course/app name as the keyword,
+so the "learning part" of a site is exempt while the "doomscrolling part" still counts.
+
+> Tip: matching is on the page title and can be wider than expected. E.g. keyword `English`
+> exempts every page with "English" in its title. Prefer specific words.
+
+---
+
+## Privacy
+
+- **Fully local**: zero network requests. No servers, no telemetry, no accounts.
+- **What's stored**: only your config (quota, whitelist, keywords), today's accumulated seconds + date, and the current session's start timestamp — in `chrome.storage.local`. **No browsing history; no URLs or page titles are ever saved.**
+- **No content scripts**: page content is never read or modified. URLs/titles live in memory only for the instant exemption check, then are discarded.
+- **Permissions and why**:
+
+| Permission | Purpose |
+| --- | --- |
+| `storage` | save config & today's usage |
+| `tabs` | read the active tab's URL & title for exemption checks |
+| `alarms` | once-per-minute safety-net settlement |
+| `notifications` | quota reminders |
+| `idle` | detect whether you're away from the computer |
+
+---
+
+## FAQ
+
+**Q: Any difference between the store version and the source version?**
+A: No functional difference. The store version auto-updates.
+
+**Q: Every Chrome launch nags "Disable developer mode extensions". Can I turn it off?**
+A: No — it's Chrome's security design. Just dismiss it with ✕; it doesn't affect the extension.
+
+**Q: I'm browsing, but the counter isn't going up. Why?**
+A: Check in order: is the window focused? More than 1 minute without keyboard/mouse (and page silent)? Is the site whitelisted? Does the title hit a keyword? The badge refreshes at least once a minute.
+
+**Q: My computer slept overnight — will that time be counted?**
+A: No. Any single session over 30 minutes is treated as sleep/clock anomaly and discarded wholesale.
+
+**Q: When does the quota reset?**
+A: On the **local date** rolling over (first check after local midnight) — not 24 hours from install.
+
+**Q: Can I see historical stats?**
+A: The current version tracks today only; no history is kept.
+
+**Q: I changed settings but nothing happened?**
+A: Make sure you clicked "Save". The badge updates immediately; timing verdicts pick it up on the next refresh cycle (≤ 1 minute).
+
+---
+
+## Project structure
+
+```
+FocusQuota/
+├── manifest.json        # MV3 manifest: permissions, Service Worker, popup, options
+├── background.js        # Service Worker: event listeners + per-minute safety-net settlement
+├── js/
+│   ├── defaults.js      # default config (single source of defaults)
+│   ├── storage.js       # storage.local I/O, validation & daily rollover
+│   ├── timer.js         # timing engine: session settlement, idle detection, sleep guard
+│   ├── exempt.js        # exemption rules: special schemes / domains / CIDR / title keywords
+│   └── notify.js        # badge & system notifications
+├── popup/               # toolbar popup: today's usage
+├── options/             # settings page
+├── icons/               # 16 / 48 / 128 icons
+├── DESIGN.md            # design doc (Chinese)
+├── IMPLEMENTATION.md    # implementation notes (Chinese)
+└── LICENSE              # GNU GPL v3.0 full text
+```
+
+Design rationale lives in [DESIGN.md](DESIGN.md) and [IMPLEMENTATION.md](IMPLEMENTATION.md) (Chinese).
+
+---
+
+## Sponsor
+
+FocusQuota is free, and always will be. If it helped you tame the scroll, buy the author a coffee:
+
+- ☕ [Ko-fi](https://ko-fi.com/achillesy) (international, PayPal supported)
+- 💸 [PayPal direct](https://paypal.me/achillesnewman)
+
+Users in China can also scan:
+
+| WeChat Pay | Alipay |
+| --- | --- |
+| <img src="sponsor/wechat.jpg?v=4" width="200"> | <img src="sponsor/alipay.jpg?v=6" width="200"> |
+
+Tipping is purely voluntary and changes nothing about the features.
+
+---
+
+## License & name usage
+
+### Code license
+
+This project uses **GNU General Public License v3.0**; full text in [LICENSE](LICENSE).
+
+```
+Copyright (C) 2026 Achilles Newman
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+```
+
+Key points (the [LICENSE](LICENSE) text prevails):
+
+| | |
+| --- | --- |
+| ✅ Allowed | free use, modification, distribution — including commercial environments |
+| ⚠️ Obligation | distributing modified/derived works **must** stay GPL-3.0 and ship **full source** |
+| ⚠️ Obligation | keep the original copyright & license notices |
+| ❌ Forbidden | **relicensing** this code as closed-source proprietary software |
+
+In short: anyone may fork it, but **nobody may turn it into a closed-source paid extension**.
+Derivatives must stay open, and recipients may freely redistribute.
+
+### Name & icons
+
+> **The name "FocusQuota" and this project's icons are NOT covered by GPL-3.0 — all rights reserved.**
+
+A copyright license grants no trademark rights (see GPL-3.0 §7(e)). If you publish a derivative:
+
+- use a **different name** and different icons;
+- don't market it in any way implying it's official or affiliated.
+
+Factual statements like "based on FocusQuota" in your docs are fine and welcome.
+
+---
+
+## 中文版
+
 > 帮助你控制每天的**普通上网时间**——只提醒，不阻止。
 
 FocusQuota 是一个基于 Chrome Manifest V3 的浏览时间统计与提醒扩展。
@@ -10,11 +380,11 @@ FocusQuota 是一个基于 Chrome Manifest V3 的浏览时间统计与提醒扩�
 
 ---
 
-## 目录
+### 目录
 
 - [适用范围](#适用范围)
 - [功能特性](#功能特性)
-- [安装（重要）](#安装重要)
+- [安装](#安装)
 - [使用说明](#使用说明)
 - [设置项详解](#设置项详解)
 - [隐私说明](#隐私说明)
@@ -25,15 +395,15 @@ FocusQuota 是一个基于 Chrome Manifest V3 的浏览时间统计与提醒扩�
 
 ---
 
-## 适用范围
+### 适用范围
 
-### 适合谁用
+#### 适合谁用
 
 - 想给自己的「刷网页」时间设一个每日上限，但**不希望被强制拦截**的人。
 - 工作/学习和娱乐混在同一个浏览器里，需要把两类时间区分开来统计的人。
 - 需要一个**完全本地、不联网、不上传任何数据**的时间统计工具的人。
 
-### 支持的浏览器
+#### 支持的浏览器
 
 | 浏览器 | 支持情况 |
 | --- | --- |
@@ -44,7 +414,7 @@ FocusQuota 是一个基于 Chrome Manifest V3 的浏览时间统计与提醒扩�
 
 操作系统：Windows / macOS / Linux 均可，桌面版浏览器。移动端 Chrome 不支持扩展。
 
-### 统计范围（什么会消耗额度）
+#### 统计范围（什么会消耗额度）
 
 只有同时满足以下**全部**条件时，时间才会被计入：
 
@@ -53,27 +423,27 @@ FocusQuota 是一个基于 Chrome Manifest V3 的浏览时间统计与提醒扩�
 3. 你**人在电脑前**（约 1 分钟无键鼠输入即视为离开而暂停；正在播放声音的页面例外，看视频/听音乐不会被判定为离开）；
 4. 该页面**不属于豁免页面**。
 
-### 不消耗额度的页面（豁免）
+#### 不消耗额度的页面（豁免）
 
 - **特殊页面**：`chrome://`、扩展页面、`about:`、开发者工具、`file:`、`view-source:` 等一律不计时。
 - **本地地址**：`localhost`、`127.0.0.1`、`::1`、`0.0.0.0` 内置豁免，本地开发调试不会被算进上网时间。
 - **域名白名单**：你自己配置，支持裸域名（`chatgpt.com` 同时匹配 `www.chatgpt.com`）和 IPv4 网段（`192.168.31.0/24`）。
 - **标题关键词**：页面标题包含任一关键词就豁免，不区分大小写。例如加入 `Blender` 后，在 YouTube 看 Blender 教程也不消耗额度。
 
-### 明确不做的事
+#### 明确不做的事
 
 不阻止访问、不关闭标签页、不重定向、不显示拦截页、不修改网页内容、不注入任何内容脚本。
 达到额度后**只提醒**。
 
 ---
 
-## 功能特性
+### 功能特性
 
 - **每日额度**：可配置分钟数，按**本地日期**每天零点自动重置（不是 24 小时滚动窗口）。
 - **图标角标实时提示**：未达额度时显示蓝色的剩余分钟数；达到额度后变为红色，显示今日已用分钟数。
 - **达额通知**：当天首次达到额度时弹一次系统通知；之后每次**在当前标签页打开新网页**时再提醒一次（带 10 秒去抖，避免重定向连弹），提醒内容形如「今日上网时长已经达到 208 分钟，超过限制额度 88 分钟」。
 - **弹窗面板**：点击工具栏图标查看今日「已用 / 额度 / 剩余」，数字实时刷新。
-- **界面语言**：v1.1.0 起支持英文界面，跟随浏览器语言自动切换（Chrome 标准 `_locales` 机制）；默认简体中文。
+- **界面语言**：v1.1.0 起支持英文界面，跟随浏览器语言自动切换（Chrome 标准 `_locales` 机制）；v1.1.1 起默认英文，不支持的语言回落英文。
 - **防误计**：
   - 电脑睡眠或系统时间异常导致的超长区间（>30 分钟）整段丢弃；
   - 计时区间的开始时间写入本地存储，Service Worker 被浏览器回收后重启仍能正确结算；
@@ -81,9 +451,9 @@ FocusQuota 是一个基于 Chrome Manifest V3 的浏览时间统计与提醒扩�
 
 ---
 
-## 安装
+### 安装
 
-### 方式一：Chrome 应用商店（推荐）
+#### 方式一：Chrome 应用商店（推荐）
 
 扩展已上架 Chrome 应用商店，直接访问安装：
 
@@ -91,11 +461,11 @@ FocusQuota 是一个基于 Chrome Manifest V3 的浏览时间统计与提醒扩�
 
 商店版会自动更新，无需手动操作。
 
-### 方式二：加载已解压的扩展程序（开发者）
+#### 方式二：加载已解压的扩展程序（开发者）
 
 以下步骤仅适用于从源码安装。Chrome 内置的开发者功能，不需要账号、不需要付费。
 
-### 步骤 1：获取源码
+#### 步骤 1：获取源码
 
 **方式 A：git 克隆（推荐，方便后续更新）**
 
@@ -126,7 +496,7 @@ FocusQuota/
 如果 ZIP 解压出来是 `JavaScript-FocusQuota-master/FocusQuota/...` 这种双层结构，
 后面选目录时要选到**含有 `manifest.json` 的那一层**。
 
-### 步骤 2：打开扩展管理页
+#### 步骤 2：打开扩展管理页
 
 在 Chrome 地址栏输入并回车：
 
@@ -138,12 +508,12 @@ chrome://extensions
 
 也可以通过菜单进入：右上角 **⋮** → **扩展程序** → **管理扩展程序**。
 
-### 步骤 3：打开「开发者模式」
+#### 步骤 3：打开「开发者模式」
 
 在扩展管理页的**右上角**，把 **开发者模式 / Developer mode** 开关打开。
 打开后，页面左上方会新出现三个按钮：**加载已解压的扩展程序**、**打包扩展程序**、**更新**。
 
-### 步骤 4：加载扩展
+#### 步骤 4：加载扩展
 
 1. 点击 **加载已解压的扩展程序 / Load unpacked**；
 2. 在弹出的目录选择框中，选中步骤 1 里那个**包含 `manifest.json` 的文件夹**（选文件夹本身，不要进到文件夹里选某个文件）；
@@ -151,12 +521,12 @@ chrome://extensions
 
 成功后，扩展列表里会出现 **FocusQuota**，状态为「已启用」。
 
-### 步骤 5：把图标固定到工具栏
+#### 步骤 5：把图标固定到工具栏
 
 点击 Chrome 工具栏上的**拼图图标（扩展程序）** → 找到 FocusQuota → 点击右侧的**图钉**图标固定。
 固定后才能随时看到角标上的剩余分钟数。
 
-### 步骤 6：允许通知（首次建议检查）
+#### 步骤 6：允许通知（首次建议检查）
 
 达额提醒依赖系统通知。若没有看到通知，请检查：
 
@@ -165,27 +535,27 @@ chrome://extensions
 
 ---
 
-### 关于「开发者模式扩展」的提示条（仅方式二）
+#### 关于「开发者模式扩展」的提示条（仅方式二）
 
 每次启动 Chrome 时，可能会看到一条提示：「**请停用以开发者模式运行的扩展程序**」。
 这是 Chrome 对所有未上架扩展的统一提醒，**点击右上角的 ✕ 关掉即可**，不影响扩展工作，
 也不要点「停用」。商店安装版没有这个问题。
 
-### 更新到新版本
+#### 更新到新版本
 
 - **商店版**：Chrome 会自动更新，无需任何操作。
 - **git 克隆的**：在项目目录执行 `git pull`，然后回到 `chrome://extensions`，点击 FocusQuota 卡片上的**刷新（↻）**按钮。
 - **下载 ZIP 的**：重新下载并**覆盖到原来的同一个文件夹**（保持路径不变），然后同样点刷新按钮。
 
-### 卸载
+#### 卸载
 
 在 `chrome://extensions` 找到 FocusQuota → 点击「移除」。所有本地数据随扩展一并删除。
 
 ---
 
-## 使用说明
+### 使用说明
 
-### 查看今日用量
+#### 查看今日用量
 
 点击工具栏上的 FocusQuota 图标，弹窗会显示：
 
@@ -194,7 +564,7 @@ chrome://extensions
 
 图标角标平时显示**剩余分钟数**（蓝底），达额后切换为**已用分钟数**（红底）。
 
-### 打开设置
+#### 打开设置
 
 在弹窗中点击「**打开设置**」按钮，或在 `chrome://extensions` 的 FocusQuota 卡片上点击「扩展程序选项」。
 
@@ -206,13 +576,13 @@ chrome://extensions
 
 ---
 
-## 设置项详解
+### 设置项详解
 
-### 每日额度（分钟）
+#### 每日额度（分钟）
 
 每天普通上网时间的上限。必须是**正整数**；填入非法值（0、负数、小数、空）保存时会自动回退为默认值 **120**。
 
-### 域名白名单
+#### 域名白名单
 
 命中的网站不消耗额度。默认包含 `chatgpt.com`、`deepseek.com`、`doubao.com`。
 
@@ -227,7 +597,7 @@ chrome://extensions
 注意：`notchatgpt.com` **不会**被 `chatgpt.com` 匹配（必须是完整的后缀分段匹配）。
 `localhost` / `127.0.0.1` / `::1` / `0.0.0.0` 已内置豁免，无需添加。
 
-### 标题关键词
+#### 标题关键词
 
 只要当前页面**标题包含**任一关键词，该页面就不计时，**不区分大小写**。默认包含 `Blender`。
 
@@ -239,7 +609,7 @@ chrome://extensions
 
 ---
 
-## 隐私说明
+### 隐私说明
 
 - **完全本地运行**：不发送任何网络请求，没有服务器，没有统计上报，没有账号。
 - **存储内容**：仅在 `chrome.storage.local` 中保存你的配置（额度、白名单、关键词）、今日累计秒数与日期、当前计时区间的开始时间戳。**不记录浏览历史，不保存你访问过的任何 URL 或页面标题。**
@@ -256,10 +626,10 @@ chrome://extensions
 
 ---
 
-## 常见问题
+### 常见问题
 
-**Q：为什么不上架 Chrome 应用商店？**
-A：上架需要一次性的开发者注册费用，作者未购买。功能上「加载已解压的扩展程序」与商店安装完全等价。
+**Q：商店版和源码版有区别吗？**
+A：功能完全一致。商店版会自动更新。
 
 **Q：每次开 Chrome 都提示「请停用以开发者模式运行的扩展程序」，能关掉吗？**
 A：关不掉，这是 Chrome 的安全设计。直接点 ✕ 忽略即可，不影响使用。
@@ -282,7 +652,7 @@ A：请确认点了「保存」。配置变更后角标会立即更新，计时�
 
 ---
 
-## 项目结构
+### 项目结构
 
 ```
 FocusQuota/
@@ -306,7 +676,7 @@ FocusQuota/
 
 ---
 
-## 赞助
+### 赞助
 
 FocusQuota 完全免费，也永远免费。如果你觉得它帮你管住了刷网页的手，欢迎请作者喝杯咖啡：
 
@@ -323,9 +693,9 @@ FocusQuota 完全免费，也永远免费。如果你觉得它帮你管住了刷
 
 ---
 
-## 许可证与名称使用
+### 许可证与名称使用
 
-### 代码许可证
+#### 代码许可证
 
 本项目采用 **GNU General Public License v3.0**，完整条款见 [LICENSE](LICENSE)。
 
@@ -358,7 +728,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 换句话说：任何人都可以 fork 本项目，但**不能把它变成一个闭源的收费扩展**。
 衍生版本必须同样开源，且接收者有权免费再分发。
 
-### 名称与图标
+#### 名称与图标
 
 > **「FocusQuota」这一名称及本项目的图标不在 GPL-3.0 的授权范围内，保留所有权利。**
 
