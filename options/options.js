@@ -1,9 +1,9 @@
 // FocusQuota - Copyright (C) 2026 Achilles Newman
 // SPDX-License-Identifier: GPL-3.0-or-later
-// 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+// This file is part of FocusQuota, licensed under GNU GPL v3.0 or later; see LICENSE in the project root.
 
-// FocusQuota — Options（阶段 6）：编辑每日额度 / 域名白名单 / 标题关键词
-// 复用 js/storage.js（setConfig 负责校验），storage 为单一数据源。
+// FocusQuota — Options (phase 6): edit daily quota / domain allowlist / title keywords
+// Reuses js/storage.js (setConfig validates); storage is the single source of truth.
 import { getConfig, setConfig } from '../js/storage.js';
 import { applyI18n } from '../js/i18n.js';
 
@@ -64,19 +64,19 @@ async function load() {
 
 document.getElementById('save').addEventListener('click', async () => {
   const raw = Number(document.getElementById('limit-input').value);
-  // setConfig 内部校验：非法额度（非正整数）回退默认值
+  // setConfig validates internally: an invalid quota (non-positive-integer) falls back to the default
   const config = await setConfig({
     dailyLimitMinutes: raw,
     excludedDomains: state.excludedDomains,
     titleKeywords: state.titleKeywords,
   });
-  // 用校验后的结果同步界面状态
+  // Sync the UI state with the validated result
   state.dailyLimitMinutes = config.dailyLimitMinutes;
   state.excludedDomains = [...config.excludedDomains];
   state.titleKeywords = [...config.titleKeywords];
   render();
 
-  // 保存即视为用户已决心离开设置页，立即关闭，无需固定延时等待
+  // Saving means the user is done with the options page — close immediately, no fixed-delay wait
   const tab = await chrome.tabs.getCurrent();
   if (tab && tab.id != null) {
     chrome.tabs.remove(tab.id);
@@ -85,7 +85,7 @@ document.getElementById('save').addEventListener('click', async () => {
   }
 });
 
-// 输入额度时实时同步 state，避免后续 render()（如增删列表项）覆盖用户输入
+// Sync state live while typing the quota, so a later render() (e.g. list add/remove) doesn't clobber user input
 document.getElementById('limit-input').addEventListener('input', (e) => {
   state.dailyLimitMinutes = Number(e.target.value);
 });
@@ -95,7 +95,7 @@ setupAdd('keyword-input', 'keyword-add', 'titleKeywords');
 
 applyI18n();
 
-// 非中文界面隐藏仅限国内的赞助二维码（微信/支付宝），Ko-fi 链接保留
+// Hide China-only sponsor QR codes (WeChat Pay/Alipay) on non-Chinese UIs; the Ko-fi link stays
 if (!chrome.i18n.getUILanguage().startsWith('zh')) {
   document.querySelectorAll('.sponsor-cn, .sponsor-qr').forEach((el) => el.remove());
 }

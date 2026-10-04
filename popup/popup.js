@@ -1,9 +1,9 @@
 // FocusQuota - Copyright (C) 2026 Achilles Newman
 // SPDX-License-Identifier: GPL-3.0-or-later
-// 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+// This file is part of FocusQuota, licensed under GNU GPL v3.0 or later; see LICENSE in the project root.
 
-// FocusQuota — Popup（阶段 6）：展示今日使用/额度/剩余
-// 与 Service Worker 共用 js/storage.js，storage 为单一数据源。
+// FocusQuota — Popup (phase 6): shows today's usage / quota / remaining
+// Shares js/storage.js with the Service Worker; storage is the single source of truth.
 import { getConfig, getUsage } from '../js/storage.js';
 import { applyI18n } from '../js/i18n.js';
 
@@ -29,13 +29,13 @@ async function render() {
 }
 
 document.getElementById('open-options').addEventListener('click', () => {
-  // 直接打开设置页 URL（tabs 权限已有），不依赖 options_ui 注册状态，更可靠
+  // Open the options page URL directly (tabs permission already granted) — more reliable than depending on options_ui registration
   chrome.tabs
     .create({ url: chrome.runtime.getURL('options/options.html') })
-    .catch((err) => console.warn('[popup] 打开设置页失败：', err));
+    .catch((err) => console.warn('[popup] failed to open options page:', err));
 });
 
-// 打开时渲染；计时/配置变化时实时刷新（Popup 保持打开时数字同步）
+// Render on open; live-refresh on timing/config changes (numbers stay in sync while the popup is open)
 chrome.storage.onChanged.addListener(() => render());
 
 applyI18n();

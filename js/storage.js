@@ -1,22 +1,22 @@
 // FocusQuota - Copyright (C) 2026 Achilles Newman
 // SPDX-License-Identifier: GPL-3.0-or-later
-// 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+// This file is part of FocusQuota, licensed under GNU GPL v3.0 or later; see LICENSE in the project root.
 
-// FocusQuota — chrome.storage.local 读写封装与校验
-// 阶段 1：配置（config）与统计（usage）的存取统一走本模块。
-// storage.local 为单一数据源；非法输入在此处被修正或回退默认值。
+// FocusQuota — chrome.storage.local read/write wrapper with validation
+// Phase 1: all config and usage access goes through this module.
+// storage.local is the single source of truth; invalid input is fixed or falls back to defaults here.
 import { DEFAULT_CONFIG } from './defaults.js';
 
 const CONFIG_KEY = 'config';
 const USAGE_KEY = 'usage';
 
-// ---- 本地工具 ----
+// ---- local helpers ----
 
 function isPlainObject(v) {
   return v !== null && typeof v === 'object' && !Array.isArray(v);
 }
 
-// 今日本地日期，格式 YYYY-MM-DD（DESIGN.md 第 7 节：按本地日期统计）
+// Today's local date, YYYY-MM-DD (DESIGN.md §7: stats are per local date)
 function todayString() {
   const d = new Date();
   const y = d.getFullYear();
@@ -25,12 +25,12 @@ function todayString() {
   return `${y}-${m}-${day}`;
 }
 
-// 正整数校验（dailyLimitMinutes 必须为正整数）
+// Positive-integer check (dailyLimitMinutes must be a positive integer)
 function isValidPositiveInt(v) {
   return Number.isInteger(v) && v > 0;
 }
 
-// 字符串数组清洗：去空串、trim、去重；不是数组则返回 null
+// Sanitize a string array: drop empties, trim, dedupe; return null if not an array
 function sanitizeStringArray(v) {
   if (!Array.isArray(v)) return null;
   const seen = new Set();
@@ -45,7 +45,7 @@ function sanitizeStringArray(v) {
   return cleaned;
 }
 
-// 逐字段校验 config，非法字段回退默认值
+// Validate config field by field; invalid fields fall back to defaults
 function sanitizeConfig(raw) {
   const out = {};
   out.dailyLimitMinutes = isValidPositiveInt(raw.dailyLimitMinutes)
@@ -71,9 +71,9 @@ function sanitizeUsage(raw) {
   };
 }
 
-// ---- 配置读写 ----
+// ---- config read/write ----
 
-// 读取配置；若从未写入或存储值不合法，则写入（修正后的）默认值并返回。
+// Read config; if never written or the stored value is invalid, write back the (sanitized) defaults and return them.
 export async function getConfig() {
   const stored = await chrome.storage.local.get(CONFIG_KEY);
   const raw = stored[CONFIG_KEY];
@@ -87,8 +87,8 @@ export async function getConfig() {
   return config;
 }
 
-// 合并更新配置：只接受三个白名单字段，未知字段忽略；非法值回退默认。
-// 返回更新并校验后的完整配置。
+// Merge-update config: only the three whitelisted fields are accepted, unknown fields ignored; invalid values fall back to defaults.
+// Returns the full updated and validated config.
 export async function setConfig(partial) {
   const current = await getConfig();
   const allowed = {};
@@ -101,9 +101,9 @@ export async function setConfig(partial) {
   return config;
 }
 
-// ---- 统计读写 ----
+// ---- usage read/write ----
 
-// 读取统计；从未写入时返回 { usageSeconds: 0, usageDate: 今日 } 并落盘。
+// Read usage; if never written, return { usageSeconds: 0, usageDate: today } and persist it.
 export async function getUsage() {
   const stored = await chrome.storage.local.get(USAGE_KEY);
   const raw = stored[USAGE_KEY];
@@ -115,26 +115,26 @@ export async function getUsage() {
   return usage;
 }
 
-// 整体写入统计（已校验）。
+// Write usage as a whole (already validated).
 export async function setUsage(usage) {
   const clean = sanitizeUsage(usage);
   await chrome.storage.local.set({ [USAGE_KEY]: clean });
   return clean;
 }
 
-// ---- 每日重置 ----
+// ---- daily rollover ----
 
-// 每日重置（DESIGN.md 第 7 节）：若 usageDate != 今日，则 usageSeconds=0、usageDate=今日。
-// 使用本地日期（YYYY-MM-DD），不使用 24 小时滚动窗口。
-// 重置逻辑集中于此函数，所有触发时机（计时结算 / SW 启动 / alarms）复用。
+// Daily rollover (DESIGN.md §7): if usageDate != today, set usageSeconds=0 and usageDate=today.
+// Uses the local date (YYYY-MM-DD), not a rolling 24-hour window.
+// Rollover logic lives only here; all triggers (settlement / SW startup / alarms) reuse it.
 export async function rolloverIfNeeded() {
   const usage = await getUsage();
   const today = todayString();
   if (usage.usageDate !== today) {
     const reset = { usageSeconds: 0, usageDate: today };
     await chrome.storage.local.set({ [USAGE_KEY]: reset });
-    console.log('[storage] 每日重置：', reset);
+    console.log('[storage] daily rollover:', reset);
     return reset;
   }
-  return usage; // 当日多次检查不会重复归零
+  return usage; // repeated checks on the same day never zero out twice
 }

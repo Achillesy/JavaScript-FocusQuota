@@ -1,16 +1,16 @@
 // FocusQuota - Copyright (C) 2026 Achilles Newman
 // SPDX-License-Identifier: GPL-3.0-or-later
-// 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+// This file is part of FocusQuota, licensed under GNU GPL v3.0 or later; see LICENSE in the project root.
 
-// FocusQuota — 默认配置（全项目唯一默认值定义处）
-// 约束（IMPLEMENTATION.md 阶段 1）：所有默认值只存在于本文件，
-// 全项目不得在其他地方再次硬编码这些默认值。
+// FocusQuota — default config (the single place where defaults are defined)
+// Constraint (IMPLEMENTATION.md phase 1): all defaults live only in this file;
+// they must not be hard-coded anywhere else in the project.
 
 export const DEFAULT_CONFIG = {
-  // 每日普通上网时间额度（分钟）
+  // Daily casual-browsing time quota (minutes)
   dailyLimitMinutes: 120,
-  // 域名白名单（豁免，不计时）：支持裸域名、www 子域、IPv4 CIDR 网段（如 192.168.31.0/24）
+  // Domain allowlist (exempt, not timed): bare domains, www subdomains, IPv4 CIDR ranges (e.g. 192.168.31.0/24)
   excludedDomains: ['chatgpt.com', 'deepseek.com', 'doubao.com'],
-  // 标题关键词（页面标题包含任一关键词则豁免）
+  // Title keywords (a page whose title contains any keyword is exempt)
   titleKeywords: ['Blender'],
 };

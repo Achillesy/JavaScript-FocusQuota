@@ -1,20 +1,20 @@
 // FocusQuota - Copyright (C) 2026 Achilles Newman
 // SPDX-License-Identifier: GPL-3.0-or-later
-// 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+// This file is part of FocusQuota, licensed under GNU GPL v3.0 or later; see LICENSE in the project root.
 
-// FocusQuota — 豁免规则（阶段 3）
-// 三类豁免：特殊页面 scheme / 域名白名单 / 标题关键词。
-// config 由调用方（timer.js）在一次 refresh 周期内读取一次后传入，避免每次判定
-// 都重复访问 chrome.storage.local；配置变更后下一次 refresh 周期立即生效。
+// FocusQuota — exemption rules (phase 3)
+// Three exemption kinds: special-page schemes / domain allowlist / title keywords.
+// config is read once per refresh cycle by the caller (timer.js) and passed in, so verdicts
+// never re-hit chrome.storage.local; config changes take effect on the next refresh cycle.
 
-// 特殊页面 scheme：一律不计入普通浏览时间（DESIGN.md 第 14 节）
+// Special-page schemes: never count toward casual browsing time (DESIGN.md §14)
 const SPECIAL_SCHEME_RE =
   /^(chrome|chrome-extension|about|devtools|edge|view-source|file|blob|data|javascript):/i;
 
-// 本地环回/本机地址：调试本地服务一律不计入普通浏览时间（内置，不可通过配置删除）
+// Loopback/local addresses: local dev servers never count toward casual browsing time (built in, not removable via config)
 const BUILTIN_LOCAL_HOSTS = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'];
 
-// 提取 URL 的 hostname（统一小写）；解析失败返回空串
+// Extract a URL's hostname (lowercased); return '' on parse failure
 function extractHostname(url) {
   try {
     return new URL(url).hostname.toLowerCase();
@@ -23,13 +23,13 @@ function extractHostname(url) {
   }
 }
 
-// 特殊页面判定：无 URL 或特殊 scheme → 豁免
+// Special-page verdict: no URL or special scheme → exempt
 function isSpecialPage(url) {
   if (!url) return true;
   return SPECIAL_SCHEME_RE.test(url);
 }
 
-// IPv4 字符串 → 32 位无符号整数；非法返回 null
+// IPv4 string → 32-bit unsigned int; null if invalid
 function ipv4ToInt(ip) {
   const parts = ip.split('.');
   if (parts.length !== 4) return null;
@@ -43,7 +43,7 @@ function ipv4ToInt(ip) {
   return val >>> 0;
 }
 
-// IPv4 CIDR 匹配（如 192.168.31.0/24）：hostname 在该网段内返回 true
+// IPv4 CIDR match (e.g. 192.168.31.0/24): true if hostname is inside the range
 function matchesCidr(hostname, cidr) {
   const slash = cidr.indexOf('/');
   if (slash === -1) return false;
@@ -51,36 +51,36 @@ function matchesCidr(hostname, cidr) {
   if (!Number.isInteger(prefix) || prefix < 0 || prefix > 32) return false;
   const net = ipv4ToInt(cidr.slice(0, slash));
   const host = ipv4ToInt(hostname);
-  if (net === null || host === null) return false; // 非 IPv4（如域名）不参与 CIDR 匹配
+  if (net === null || host === null) return false; // non-IPv4 (e.g. domain names) never match CIDR
   const mask = prefix === 0 ? 0 : (~0 << (32 - prefix)) >>> 0;
   return (net & mask) === (host & mask);
 }
 
-// 白名单匹配：
-// - CIDR 网段（含 /，如 192.168.31.0/24）→ 网段匹配
-// - 常规域名 → hostname 等于白名单项，或以 ".白名单项" 结尾
-//   例：www.chatgpt.com 匹配 chatgpt.com；notchatgpt.com 不匹配（不以 .chatgpt.com 结尾）
+// Allowlist matching:
+// - CIDR range (contains /, e.g. 192.168.31.0/24) → range match
+// - Plain domain → hostname equals the entry, or ends with ".<entry>"
+//   e.g. www.chatgpt.com matches chatgpt.com; notchatgpt.com doesn't (doesn't end with .chatgpt.com)
 function matchesDomain(hostname, domain) {
   const d = domain.toLowerCase();
   if (d.includes('/')) return matchesCidr(hostname, d);
   return hostname === d || hostname.endsWith('.' + d);
 }
 
-// 标题关键词匹配：title 包含任一关键词，不区分大小写
-// 理由：blender 与 Blender 应视为同一关键词，贴近用户直觉，避免大小写差异漏豁免
+// Title keyword match: title contains any keyword, case-insensitive
+// Rationale: blender and Blender should count as the same keyword — matches user intuition, avoids case-miss exemptions
 function matchesKeywords(title, keywords) {
   if (!title) return false;
   const t = title.toLowerCase();
   return keywords.some((kw) => t.includes(kw.toLowerCase()));
 }
 
-// 综合豁免判定：返回 true 表示该页面不消耗普通浏览时间
-// config 为调用方已读取好的配置对象（不再内部读取 storage，纯同步计算）。
+// Combined exemption verdict: true means this page consumes no casual browsing time
+// config is the already-read config object from the caller (no internal storage reads; pure sync computation).
 export function isExempt(url, title, config) {
   if (isSpecialPage(url)) return true;
   const hostname = extractHostname(url);
-  if (!hostname) return true; // 无法提取 hostname（无有效 URL）→ 保守处理为不计时
-  if (BUILTIN_LOCAL_HOSTS.includes(hostname)) return true; // 本地环回地址
+  if (!hostname) return true; // hostname unextractable (no valid URL) → conservatively do not time
+  if (BUILTIN_LOCAL_HOSTS.includes(hostname)) return true; // loopback address
   if (config.excludedDomains.some((d) => matchesDomain(hostname, d))) return true;
   if (matchesKeywords(title, config.titleKeywords)) return true;
   return false;

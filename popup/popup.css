@@ -1,10 +1,10 @@
 /*
  * FocusQuota - Copyright (C) 2026 Achilles Newman
  * SPDX-License-Identifier: GPL-3.0-or-later
- * 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+ * This file is part of FocusQuota, licensed under GNU GPL v3.0 or later; see LICENSE in the project root.
  */
 
-/* FocusQuota — Popup 样式（阶段 6） */
+/* FocusQuota — Popup styles (phase 6) */
 
 body {
   width: 300px;

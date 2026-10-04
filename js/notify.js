@@ -1,23 +1,23 @@
 // FocusQuota - Copyright (C) 2026 Achilles Newman
 // SPDX-License-Identifier: GPL-3.0-or-later
-// 本文件是 FocusQuota 的一部分，依据 GNU GPL v3.0 或更高版本授权；详见项目根目录 LICENSE。
+// This file is part of FocusQuota, licensed under GNU GPL v3.0 or later; see LICENSE in the project root.
 
-// FocusQuota — 额度提醒（阶段 5）
-// 达到每日额度后：弹系统通知 + 图标 badge 持续提示。
-// 达额后每次打开新网页（导航）时再次提醒（用户选择；含短去抖防连环导航连弹）。
-// 只提醒，绝不阻止访问（DESIGN.md 第 2.1 节：不重定向、不关标签页、不阻塞页面、不改网页内容）。
+// FocusQuota — quota reminders (phase 5)
+// When the daily quota is reached: fire a system notification + persistent icon badge.
+// Remind again on every new page opened (navigation) after the quota is reached (user's choice; short debounce guards against chained-navigation bursts).
+// Remind only, never block access (DESIGN.md §2.1: no redirects, no tab closing, no page blocking, no page modification).
 import { getConfig, getUsage } from './storage.js';
 
 const NOTIFY_ID = 'focusquota-limit-reached';
-// 记录「今日已弹过额度通知」的日期，用于防打扰（同日只弹一次）
+// Records the date the quota notification already fired "today", for anti-nag (once per day)
 const LIMIT_NOTIFIED_KEY = 'limitNotifiedDate';
-// 导航提醒最小间隔：避免同一导航的重定向/SPA 连环 URL 变化连弹
+// Min interval between navigation reminders: avoid bursts from redirect chains / SPA URL churn on one navigation
 const NAV_NOTIFY_MIN_MS = 10 * 1000;
-let lastNavNotifyAt = 0; // 内存记录；SW 重启后允许重新提醒，可接受
+let lastNavNotifyAt = 0; // in-memory; re-reminding after an SW restart is acceptable
 
-// 判定并执行额度提醒。每次结算后 / SW 启动时 / 配置变更时调用。
-// config/usage 可选：调用方若在同一 refresh 周期内已读取过，可直接传入避免重复读 storage；
-// 省略时（如 SW 初始化、配置变更监听）内部自行读取最新值。
+// Evaluate and fire quota reminders. Called after each settlement / on SW startup / on config change.
+// config/usage are optional: if the caller already read them in this refresh cycle, pass them in to avoid re-reading storage;
+// otherwise (e.g. SW init, config-change listener) they are read fresh internally.
 export async function checkAndNotify(config, usage) {
   config = config ?? (await getConfig());
   usage = usage ?? (await getUsage());
@@ -25,12 +25,12 @@ export async function checkAndNotify(config, usage) {
   const over = usage.usageSeconds >= limitSeconds;
 
   if (over) {
-    // 持续提示：达额后 badge 继续显示已用分钟数（红色），让用户看到超出/累计进度
+    // Persistent cue: after the quota is reached the badge keeps showing used minutes (red), so overage/accumulation stays visible
     const usedMin = Math.ceil(usage.usageSeconds / 60);
     const text = usedMin > 999 ? '999+' : String(usedMin);
     await chrome.action.setBadgeText({ text });
-    await chrome.action.setBadgeBackgroundColor({ color: '#d93025' }); // 红色
-    // 防打扰：同一天只弹一次通知，之后以 badge 持续提示
+    await chrome.action.setBadgeBackgroundColor({ color: '#d93025' }); // red
+    // Anti-nag: notify at most once per day; the badge keeps reminding afterwards
     const stored = await chrome.storage.local.get(LIMIT_NOTIFIED_KEY);
     if (stored[LIMIT_NOTIFIED_KEY] !== usage.usageDate) {
       try {
@@ -44,27 +44,27 @@ export async function checkAndNotify(config, usage) {
           priority: 1,
         });
       } catch (err) {
-        console.warn('[notify] 通知发送失败：', err);
+        console.warn('[notify] failed to send notification:', err);
       }
       await chrome.storage.local.set({ [LIMIT_NOTIFIED_KEY]: usage.usageDate });
-      console.log(`[notify] 已弹额度提醒（${usage.usageDate}）`);
+      console.log(`[notify] quota reminder fired (${usage.usageDate})`);
     }
   } else {
-    // 未达额度：badge 显示剩余分钟数（badge 最多 4 字符，超 999 显示 999+）
+    // Quota not reached: badge shows remaining minutes (badge fits 4 chars max; over 999 shows 999+)
     const remaining = Math.ceil((limitSeconds - usage.usageSeconds) / 60);
     const text = remaining > 999 ? '999+' : String(remaining);
     await chrome.action.setBadgeText({ text });
-    await chrome.action.setBadgeBackgroundColor({ color: '#1a73e8' }); // 蓝色
+    await chrome.action.setBadgeBackgroundColor({ color: '#1a73e8' }); // blue
   }
 }
 
-// 达额后每次打开新网页（导航）时提醒；未达额或去抖窗口内忽略。
+// Remind on every new page opened (navigation) after the quota is reached; ignore when under quota or inside the debounce window.
 export async function notifyOnNavigation() {
   const config = await getConfig();
   const usage = await getUsage();
-  if (usage.usageSeconds < config.dailyLimitMinutes * 60) return; // 未达额
+  if (usage.usageSeconds < config.dailyLimitMinutes * 60) return; // quota not reached
   const now = Date.now();
-  if (now - lastNavNotifyAt < NAV_NOTIFY_MIN_MS) return; // 去抖
+  if (now - lastNavNotifyAt < NAV_NOTIFY_MIN_MS) return; // debounce
   lastNavNotifyAt = now;
   const usedMinutes = Math.ceil(usage.usageSeconds / 60);
   const overMinutes = Math.max(
@@ -82,8 +82,8 @@ export async function notifyOnNavigation() {
       ]),
       priority: 1,
     });
-    console.log('[notify] 已达额：打开新网页提醒');
+    console.log('[notify] quota reached: new-page reminder');
   } catch (err) {
-    console.warn('[notify] 通知发送失败：', err);
+    console.warn('[notify] failed to send notification:', err);
   }
 }
