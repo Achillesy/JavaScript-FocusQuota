@@ -18,7 +18,6 @@ async function render() {
 
   document.getElementById('used-min').textContent = String(usedMin);
   document.getElementById('limit-min').textContent = String(config.dailyLimitMinutes);
-  document.getElementById('remaining-min').textContent = String(remainingMin);
 
   const remainingEl = document.getElementById('remaining');
   remainingEl.textContent = over
