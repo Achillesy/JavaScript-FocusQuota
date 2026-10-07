@@ -35,11 +35,11 @@ Note: the extension's interface is currently in Simplified Chinese.
 
 - **Single purpose（单一用途）**:
   `Help users limit daily casual browsing time through reminders, without blocking any website.`
-- **Does your extension collect or use user data?** 严格来说读了当前活动标签页的 URL/标题并只存本地 → 按问卷如实选：
-  - **Browsing activity**（勾选）— 用途：计算每日普通上网用时；**仅存储在本地**（`chrome.storage.local`），**不传输、不共享、不出售**。
+- **Does your extension collect or use user data?** 读取当前活动标签页的 URL/标题，仅在内存中瞬时判断，不落盘、不建历史 → 按问卷如实选：
+  - **Browsing activity**（勾选）— 用途：读取当前活动标签页的 URL/标题，在内存中实时判断是否计入每日普通上网用时，判断完即弃、不存储；落盘的只有累计用时秒数与用户设置，**不传输、不共享、不出售**。
   - 其余数据类型不勾选。
 - **Data usage / handling disclosure**:
-  `The extension reads the active tab's URL and page title solely to compute daily browsing usage. This data is stored only in the browser's local storage on the user's device and is never transmitted, shared, or sold.`
+  `The extension reads the active tab's URL and page title in memory, only to decide whether the current page counts toward the daily quota. The URL and title are never stored, and no history is built. Only the accumulated browsing time (seconds) and the user's settings are stored in the browser's local storage on the device, and nothing is ever transmitted, shared, or sold.`
 - **Permission justifications（权限说明）**:
   - `storage` — Stores quota settings, whitelist, and today's usage counters locally on the device.
   - `tabs` — Reads the active tab's URL and title to decide whether the current page counts toward the daily quota. Only the active tab is ever read; the background timer has no user gesture, so `activeTab` cannot substitute. Nothing is transmitted.
