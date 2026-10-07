@@ -87,7 +87,7 @@ FocusQuota/
 **给 AI 的提示（prompt 模板）：**
 
 ```text
-项目路径：/mnt/d/Users/Achilles/Workspace_02Tested/JavaScript/FocusQuota
+项目路径：/mnt/d/Users/Achilles/Workspace_01Active/JavaScript/FocusQuota
 请先阅读 DESIGN.md 和 IMPLEMENTATION.md 的「阶段 0」部分。
 本次任务：实现阶段 0「项目骨架」。
 要求：
@@ -126,7 +126,7 @@ FocusQuota/
 **给 AI 的提示（prompt 模板）：**
 
 ```text
-项目路径：/mnt/d/Users/Achilles/Workspace_02Tested/JavaScript/FocusQuota
+项目路径：/mnt/d/Users/Achilles/Workspace_01Active/JavaScript/FocusQuota
 请先阅读 DESIGN.md 和 IMPLEMENTATION.md 的「阶段 1」部分。
 本次任务：实现阶段 1「配置与存储层」。
 要求：
@@ -168,7 +168,7 @@ FocusQuota/
 **给 AI 的提示（prompt 模板）：**
 
 ```text
-项目路径：/mnt/d/Users/Achilles/Workspace_02Tested/JavaScript/FocusQuota
+项目路径：/mnt/d/Users/Achilles/Workspace_01Active/JavaScript/FocusQuota
 请先阅读 DESIGN.md 和 IMPLEMENTATION.md 的「阶段 2」部分。
 本次任务：实现阶段 2「核心计时引擎」。
 要求：
@@ -210,7 +210,7 @@ FocusQuota/
 **给 AI 的提示（prompt 模板）：**
 
 ```text
-项目路径：/mnt/d/Users/Achilles/Workspace_02Tested/JavaScript/FocusQuota
+项目路径：/mnt/d/Users/Achilles/Workspace_01Active/JavaScript/FocusQuota
 请先阅读 DESIGN.md 和 IMPLEMENTATION.md 的「阶段 3」部分。
 本次任务：实现阶段 3「豁免规则」。
 要求：
@@ -242,7 +242,7 @@ FocusQuota/
 **给 AI 的提示（prompt 模板）：**
 
 ```text
-项目路径：/mnt/d/Users/Achilles/Workspace_02Tested/JavaScript/FocusQuota
+项目路径：/mnt/d/Users/Achilles/Workspace_01Active/JavaScript/FocusQuota
 请先阅读 DESIGN.md 和 IMPLEMENTATION.md 的「阶段 4」部分。
 本次任务：实现阶段 4「每日重置」。
 要求：
@@ -263,7 +263,7 @@ FocusQuota/
 1. 额度判定：`usageSeconds >= dailyLimitMinutes * 60`。
 2. 提醒方式（DESIGN.md 第 2.1 节，只提醒不阻止）：
    - `chrome.notifications` 弹通知（如「今日普通上网时间已达到 120 分钟」）。
-   - `chrome.action.setBadgeText` 持续提示：未达额显示剩余分钟数（超 999 显示 `999+`，蓝色），达额显示「满」（红色）。
+   - `chrome.action.setBadgeText` 持续提示：未达额显示剩余分钟数（超 999 显示 `999+`，蓝色），达额显示今日已用分钟数（红色）。
 3. 提醒策略：
    - 达到额度的瞬间弹一次通知（同日只弹一次，`limitNotifiedDate` 防打扰）。
    - **达额后每次打开新网页（导航，含 SPA 跳转）再次弹通知提醒**（10 秒去抖，避免同一导航的连环重定向连弹）。
@@ -273,7 +273,7 @@ FocusQuota/
 **验收标准：**
 
 - [ ] 达到额度时弹出通知一次。
-- [ ] 图标 badge 显示持续提示（未达额剩余分钟 / 达额「满」）。
+- [ ] 图标 badge 显示持续提示（未达额剩余分钟 / 达额已用分钟数）。
 - [ ] 达到额度后仍可正常访问任意网页。
 - [ ] 同日结算不会反复弹；达额后导航提醒按 10 秒去抖频率重复。
 - [ ] 额度被调大后，次日（或重置后）按新额度重新计算。
@@ -281,7 +281,7 @@ FocusQuota/
 **给 AI 的提示（prompt 模板）：**
 
 ```text
-项目路径：/mnt/d/Users/Achilles/Workspace_02Tested/JavaScript/FocusQuota
+项目路径：/mnt/d/Users/Achilles/Workspace_01Active/JavaScript/FocusQuota
 请先阅读 DESIGN.md 和 IMPLEMENTATION.md 的「阶段 5」部分。
 本次任务：实现阶段 5「额度提醒」。
 要求：
@@ -320,7 +320,7 @@ FocusQuota/
 **给 AI 的提示（prompt 模板）：**
 
 ```text
-项目路径：/mnt/d/Users/Achilles/Workspace_02Tested/JavaScript/FocusQuota
+项目路径：/mnt/d/Users/Achilles/Workspace_01Active/JavaScript/FocusQuota
 请先阅读 DESIGN.md 和 IMPLEMENTATION.md 的「阶段 6」部分。
 本次任务：实现阶段 6「Popup 与 Options UI」。
 要求：
@@ -355,7 +355,7 @@ FocusQuota/
 **给 AI 的提示（prompt 模板）：**
 
 ```text
-项目路径：/mnt/d/Users/Achilles/Workspace_02Tested/JavaScript/FocusQuota
+项目路径：/mnt/d/Users/Achilles/Workspace_01Active/JavaScript/FocusQuota
 请先阅读 DESIGN.md（重点第 23 节）和 IMPLEMENTATION.md 的「阶段 7」部分。
 本次任务：阶段 7「验收」。
 要求：逐条列出 DESIGN.md 第 23 节的完成标准，标注每项「已通过/未通过/待验证」，未通过项给出修复方案。先给验收清单，不要直接改代码。

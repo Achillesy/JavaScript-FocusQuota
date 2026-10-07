@@ -39,12 +39,14 @@ Work and study sites can be whitelisted or exempted by title keyword, so they do
 
 | Browser | Support |
 | --- | --- |
-| Google Chrome (88+, MV3) | ✅ Tested |
-| Microsoft Edge (Chromium) | ✅ Install via "Load unpacked" the same way |
+| Google Chrome (MV3, 95+) | ✅ Tested |
+| Microsoft Edge (Chromium 95+) | ✅ Install via "Load unpacked" the same way |
 | Other Chromium browsers (Brave / Vivaldi, …) | ⚠️ Should work in theory, not tested one by one |
 | Firefox / Safari | ❌ Not supported (extension APIs differ) |
 
 OS: Windows / macOS / Linux, desktop browsers. Mobile Chrome doesn't support extensions.
+
+> FocusQuota relies on an ES-module Service Worker and the promise-based `chrome.storage` API, so Chrome/Edge **95 or newer** is required; older Chromium versions are not supported.
 
 ### What counts toward the quota
 
@@ -290,7 +292,8 @@ FocusQuota/
 │   ├── storage.js       # storage.local I/O, validation & daily rollover
 │   ├── timer.js         # timing engine: session settlement, idle detection, sleep guard
 │   ├── exempt.js        # exemption rules: special schemes / domains / CIDR / title keywords
-│   └── notify.js        # badge & system notifications
+│   ├── notify.js        # badge & system notifications
+│   └── i18n.js          # UI language helper (data-i18n attributes + chrome.i18n)
 ├── popup/               # toolbar popup: today's usage
 ├── options/             # settings page
 ├── icons/               # 16 / 48 / 128 icons

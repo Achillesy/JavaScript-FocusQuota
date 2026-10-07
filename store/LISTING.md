@@ -20,7 +20,7 @@ FocusQuota helps you keep casual browsing within a daily limit — with a gentle
 How it works
 • Set a daily quota in minutes (default 120).
 • FocusQuota quietly tracks time spent on ordinary browsing in the active tab.
-• When you reach your quota, you get a friendly notification — that's it. No website is ever blocked or redirected.
+• When you reach your quota, you get a friendly notification, and a gentle nudge whenever you open a new page afterwards. No website is ever blocked or redirected.
 • Idle time doesn't count: if there's no keyboard or mouse input for about a minute and the page is silent, the timer pauses.
 • A domain whitelist and title keywords let you exempt work sites (e.g. chatgpt.com) or apps (e.g. Blender) from the quota.
 
@@ -28,7 +28,7 @@ Privacy first
 • Everything runs locally in your browser. Your browsing data never leaves your device — no accounts, no servers, no analytics.
 • Open source under GPL-3.0: https://github.com/Achillesy/JavaScript-FocusQuota
 
-Note: the extension's interface is currently in Simplified Chinese.
+Note: the interface follows your browser language and ships in English and Simplified Chinese (English is the default).
 ```
 
 ## Privacy practices（隐私问卷）
@@ -50,11 +50,10 @@ Note: the extension's interface is currently in Simplified Chinese.
 
 ## Distribution（发行）
 
-- **Visibility（可见性）**: 待用户定 — Public / Unlisted / Private
+- **Visibility（可见性）**: 已上架（Public；商店 URL 见 README 安装节）
 - **定价**: 免费
 
 ## 备注
 
-- 商店商品 URL 在首次上传 ZIP 建好 item 后产生，形如 `https://chromewebstore.google.com/detail/<32位ID>`，
-  拿到后回填到 README 安装节，并把"未上架"相关文字改掉。
-- manifest 版本已升到 1.0.0（商店首发版）。
+- 商店商品 URL 已产生并回填到 README 安装节：`https://chromewebstore.google.com/detail/pjmaoknjkfbammiflaijahjefagjhakc`。
+- manifest 版本已升到 1.1.1（商店首发版为 1.0.0）。

@@ -472,8 +472,8 @@ usage = 120
 
 项目的真实目录位于 Windows 下的 NTFS 格式 USB 磁盘（D: 盘），通过 WSL2 挂载访问。
 
-- WSL 路径：`/mnt/d/Users/Achilles/Workspace_02Tested/JavaScript/FocusQuota`
-- Windows 路径：`D:\Users\Achilles\Workspace_02Tested\JavaScript\FocusQuota`
+- WSL 路径：`/mnt/d/Users/Achilles/Workspace_01Active/JavaScript/FocusQuota`
+- Windows 路径：`D:\Users\Achilles\Workspace_01Active\JavaScript\FocusQuota`
 
 原因：
 

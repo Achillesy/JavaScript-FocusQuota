@@ -39,12 +39,14 @@ FocusQuota 是一个基于 Chrome Manifest V3 的浏览时间统计与提醒扩�
 
 | 浏览器 | 支持情况 |
 | --- | --- |
-| Google Chrome（88+，支持 MV3） | ✅ 已测试 |
-| Microsoft Edge（Chromium 内核） | ✅ 同样以「加载已解压的扩展」方式安装 |
+| Google Chrome（MV3，95+） | ✅ 已测试 |
+| Microsoft Edge（Chromium 内核 95+） | ✅ 同样以「加载已解压的扩展」方式安装 |
 | 其他 Chromium 内核浏览器（Brave / Vivaldi 等） | ⚠️ 理论可用，未逐一测试 |
 | Firefox / Safari | ❌ 不支持（扩展 API 不兼容） |
 
 操作系统：Windows / macOS / Linux 均可，桌面版浏览器。移动端 Chrome 不支持扩展。
+
+> FocusQuota 依赖模块化 Service Worker 与 Promise 形式的 `chrome.storage` API，需要 Chrome / Edge **95 或更高版本**，不支持更旧的 Chromium 版本。
 
 #### 统计范围（什么会消耗额度）
 
@@ -295,7 +297,8 @@ FocusQuota/
 │   ├── storage.js       # storage.local 读写、校验与每日重置
 │   ├── timer.js         # 计时引擎：区间结算、空闲判定、防睡眠误计
 │   ├── exempt.js        # 豁免规则：特殊 scheme / 域名 / CIDR / 标题关键词
-│   └── notify.js        # 角标与系统通知
+│   ├── notify.js        # 角标与系统通知
+│   └── i18n.js          # 界面语言辅助（data-i18n 属性 + chrome.i18n）
 ├── popup/               # 工具栏弹窗：今日用量
 ├── options/             # 设置页
 ├── icons/               # 16 / 48 / 128 图标

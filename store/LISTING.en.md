@@ -7,14 +7,14 @@ FocusQuota — a gentle daily quota for casual browsing.
 
 You don't need another app that locks you out of websites. You need an honest nudge that tells you the truth: "you've already spent 2 hours scrolling today."
 
-FocusQuota is a lightweight time tracker for casual browsing in Chrome. Set a daily screen-time limit (default: 2 hours) and go about your day. A badge on the toolbar quietly counts down your remaining time. When the quota is used up, you get one friendly reminder per day — and that's it. No blocked pages, no closed tabs, no passwords, no guilt trips. Just awareness.
+FocusQuota is a lightweight time tracker for casual browsing in Chrome. Set a daily screen-time limit (default: 2 hours) and go about your day. A badge on the toolbar quietly counts down your remaining time. When the quota is used up, you get one friendly reminder for the day — plus a gentle nudge each time you open a new page after that. No blocked pages, no closed tabs, no passwords, no guilt trips. Just awareness.
 
 HOW IT WORKS
 
 - Set your daily quota for casual browsing
 - Whitelist the sites that don't count: work tools, AI assistants, local dev servers
 - The toolbar badge always shows your remaining time at a glance
-- Reach the limit? One gentle notification. Nothing is ever blocked.
+- Reach the limit? A gentle reminder, and a nudge on each new page after that. Nothing is ever blocked.
 
 SOFTER THAN A POMODORO, KINDER THAN A BLOCKER
 
