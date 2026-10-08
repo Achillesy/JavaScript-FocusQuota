@@ -22,6 +22,7 @@ Work and study sites can be whitelisted or exempted by title keyword, so they do
 - [Privacy](#privacy)
 - [FAQ](#faq)
 - [Project structure](#project-structure)
+- [Related projects](#related-projects)
 - [Sponsor](#sponsor)
 - [License & name usage](#license--name-usage)
 
@@ -302,6 +303,12 @@ FocusQuota/
 ```
 
 Design rationale lives in [docs/DESIGN.md](docs/DESIGN.md) and [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) (Chinese).
+
+---
+
+## Related projects
+
+**[ItamiBen](https://github.com/Achillesy/CSharp_ItamiBen)** — a strict Pomodoro timer with teeth (desktop app for Windows/macOS/Linux). It watches your foreground window: off-task minutes don't count. For when FocusQuota's gentle nudges aren't strict enough. [Releases →](https://github.com/Achillesy/CSharp_ItamiBen/releases)
 
 ---
 

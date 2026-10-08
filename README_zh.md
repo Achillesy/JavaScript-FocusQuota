@@ -22,6 +22,7 @@ FocusQuota 是一个基于 Chrome Manifest V3 的浏览时间统计与提醒扩�
 - [隐私说明](#隐私说明)
 - [常见问题](#常见问题)
 - [项目结构](#项目结构)
+- [相关项目](#相关项目)
 - [赞助](#赞助)
 - [许可证与名称使用](#许可证与名称使用)
 
@@ -307,6 +308,12 @@ FocusQuota/
 ```
 
 设计取舍与实现细节见 [docs/DESIGN.md](docs/DESIGN.md) 与 [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md)。
+
+---
+
+### 相关项目
+
+**[ItamiBen](https://github.com/Achillesy/CSharp_ItamiBen)** —— 带"牙齿"的严格番茄钟（Windows/macOS/Linux 桌面应用）。它盯着你的前台窗口：摸鱼的时间不算数。适合觉得 FocusQuota 还不够"狠"的时候。[去下载 →](https://github.com/Achillesy/CSharp_ItamiBen/releases)
 
 ---
 
