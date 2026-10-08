@@ -56,4 +56,4 @@ Note: the interface follows your browser language and ships in English and Simpl
 ## 备注
 
 - 商店商品 URL 已产生并回填到 README 安装节：`https://chromewebstore.google.com/detail/pjmaoknjkfbammiflaijahjefagjhakc`。
-- manifest 版本已升到 1.1.1（商店首发版为 1.0.0）。
+- manifest 版本已升到 1.2.0（商店首发版为 1.0.0）。

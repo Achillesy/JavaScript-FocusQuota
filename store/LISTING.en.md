@@ -13,7 +13,7 @@ HOW IT WORKS
 
 - Set your daily quota for casual browsing
 - Whitelist the sites that don't count: work tools, AI assistants, local dev servers
-- The toolbar badge always shows your remaining time at a glance
+- The toolbar badge shows your remaining time at a glance — turning red to show how many minutes over the quota once it's used up
 - Reach the limit? A gentle reminder, and a nudge on each new page after that. Nothing is ever blocked.
 
 SOFTER THAN A POMODORO, KINDER THAN A BLOCKER
