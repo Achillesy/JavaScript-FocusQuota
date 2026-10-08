@@ -74,7 +74,7 @@ When the quota is reached, it **only reminds**.
 ## Features
 
 - **Daily quota**: configurable minutes, auto-resets at local midnight every day (not a rolling 24-hour window).
-- **Live toolbar badge**: blue remaining minutes before the quota is reached; red used-minutes after.
+- **Live toolbar badge**: blue remaining minutes before the quota is reached; red over-limit minutes after.
 - **Quota notifications**: one system notification on the day's first hit; afterwards one reminder each time you **open a new page in the current tab** (10-second debounce against redirect bursts), e.g. "You've browsed for 208 minutes today, 88 minutes over your quota".
 - **Popup panel**: click the toolbar icon to see today's used / quota / remaining, updated live.
 - **UI language**: English UI since v1.1.0, follows the browser language automatically (Chrome's standard `_locales` mechanism); English is the default since v1.1.1, and unlisted languages fall back to English.
@@ -194,7 +194,7 @@ Click the FocusQuota toolbar icon. The popup shows:
 - minutes used today / daily quota;
 - minutes remaining ("Today's quota is used up" once exhausted).
 
-The badge normally shows **remaining minutes** (blue); after the quota is hit it switches to **used minutes** (red).
+The badge normally shows **remaining minutes** (blue); after the quota is hit it switches to **minutes over the limit** (red).
 
 ### Open settings
 

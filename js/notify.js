@@ -25,9 +25,11 @@ export async function checkAndNotify(config, usage) {
   const over = usage.usageSeconds >= limitSeconds;
 
   if (over) {
-    // Persistent cue: after the quota is reached the badge keeps showing used minutes (red), so overage/accumulation stays visible
-    const usedMin = Math.ceil(usage.usageSeconds / 60);
-    const text = usedMin > 999 ? '999+' : String(usedMin);
+    // Persistent cue: after the quota is reached the badge shows overage minutes (red),
+    // i.e. how far beyond the daily limit — "1" reads better than total used "121",
+    // and matches the notification wording ("X minutes over the limit").
+    const overMin = Math.ceil((usage.usageSeconds - limitSeconds) / 60);
+    const text = overMin > 999 ? '999+' : String(overMin);
     await chrome.action.setBadgeText({ text });
     await chrome.action.setBadgeBackgroundColor({ color: '#d93025' }); // red
     // Anti-nag: notify at most once per day; the badge keeps reminding afterwards
