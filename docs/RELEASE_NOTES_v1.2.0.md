@@ -8,6 +8,7 @@
 - 角标行为描述同步更新：`README.md`、`README_zh.md`、`docs/IMPLEMENTATION.md`、
   商店英文长描述 `store/LISTING.en.md`
 - `manifest.json` 版本升到 1.2.0；`store/LISTING.md` 备注同步
+- 设置页新增「更多工具」被动展示区：介绍姊妹项目 ItamiBen（严格番茄钟桌面应用）并附下载链接；静态页面，无弹窗、无通知，未新增权限
 
 ### 兼容性与隐私
 - **未新增任何权限**：仍为 `storage` / `tabs` / `alarms` / `notifications` / `idle`
