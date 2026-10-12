@@ -37,4 +37,6 @@ PRIVACY
 - No accounts, no analytics, no network requests
 - Only the minimum permissions needed to do the job
 - Open source under GPL-3.0: https://github.com/Achillesy/JavaScript-FocusQuota
+
+More from the developer: ItamiBen — a strict Pomodoro timer with teeth for Windows/macOS/Linux. https://github.com/Achillesy/CSharp_ItamiBen
 ```
